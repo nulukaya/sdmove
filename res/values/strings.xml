@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="app_name">SDMove</string>
+	<string name="autoextdesc">indicates that the app has been moved to external storage</string>
+	<string name="autointdesc">indicates that the app has not been moved to external storage, but can be</string>
+	<string name="intonlydesc">indicates that the developer has been prevented the app from being moved to external storage</string>
+	<string name="prefextdesc">indicates that the app prefers being on external storage, and is there</string>
+	<string name="prefintdesc">indicates that the app prefers being on external storage, but is installed to internal storage anyway</string>
+	<string name="thanks">Thanks to iSec Partners for providing the source code to Manifest Explorer, which pointed me in the right direction in parsing the AndroidManifest file.  Thanks to the guys at QuickSystemInfo for providing their source code, which showed me how to directly open the Application Info program.</string>
+	<string name="copyright">Copyright ©2010, Bitt Faulk</string>
+</resources>

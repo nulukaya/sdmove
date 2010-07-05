@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/DialogLayout"
+	android:layout_width="fill_parent" android:layout_height="fill_parent">
+	<TextView android:id="@+id/autoext" android:text="@string/autoext"
+		android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/autoext">
+	</TextView>
+	<TextView android:id="@+id/autoint" android:text="@string/autoint"
+		android:layout_below="@+id/autoextdesc"
+		android:layout_height="wrap_content" android:layout_width="wrap_content" android:textColor="@color/autoint">
+	</TextView>
+	<TextView android:id="@+id/prefext" android:text="@string/prefext"
+		android:layout_below="@+id/autointdesc"
+		android:layout_height="wrap_content" android:layout_width="wrap_content" android:textColor="@color/prefext">
+	</TextView>
+	<TextView android:id="@+id/prefint" android:text="@string/prefint"
+		android:layout_below="@+id/prefextdesc"
+		android:layout_height="wrap_content" android:layout_width="wrap_content" android:textColor="@color/prefint">
+	</TextView>
+	<TextView android:id="@+id/intonly" android:text="@string/intonly"
+		android:layout_below="@+id/prefintdesc"
+		android:layout_height="wrap_content" android:layout_width="wrap_content" android:textColor="@color/intonly">
+	</TextView>
+	<TextView android:id="@+id/autoextdesc" android:text="@string/autoextdesc"
+		android:layout_toRightOf="@+id/autoext"
+		android:layout_height="wrap_content" android:layout_width="wrap_content">
+	</TextView>
+	<TextView android:id="@+id/autointdesc" android:text="@string/autointdesc"
+		android:layout_toRightOf="@+id/autoint" android:layout_below="@+id/autoextdesc"
+		android:layout_height="wrap_content" android:layout_width="wrap_content">
+	</TextView>
+	<TextView android:id="@+id/prefextdesc" android:text="@string/prefextdesc"
+		android:layout_toRightOf="@+id/prefext" android:layout_below="@+id/autointdesc"
+		android:layout_height="wrap_content" android:layout_width="wrap_content">
+	</TextView>
+	<TextView android:id="@+id/prefintdesc" android:text="@string/prefintdesc"
+		android:layout_toRightOf="@+id/prefint" android:layout_below="@+id/prefextdesc"
+		android:layout_height="wrap_content" android:layout_width="wrap_content">
+	</TextView>
+	<TextView android:id="@+id/intonlydesc" android:text="@string/intonlydesc"
+		android:layout_toRightOf="@+id/intonly" android:layout_below="@+id/prefintdesc"
+		android:layout_height="wrap_content" android:layout_width="wrap_content">
+	</TextView>
+	<TextView android:id="@+id/thanks" android:text="@string/thanks" android:textSize="8sp"
+		android:layout_above="@+id/copyright" android:layout_centerHorizontal="true" android:gravity="center_horizontal"
+		android:layout_height="wrap_content" android:layout_width="wrap_content">		
+	</TextView>
+	<TextView android:id="@+id/copyright" android:text="@string/copyright" android:textSize="10sp"
+		android:layout_alignParentBottom="true" android:layout_centerHorizontal="true"
+		android:layout_height="wrap_content" android:layout_width="wrap_content">		
+	</TextView>
+</RelativeLayout>
