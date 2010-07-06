@@ -81,28 +81,28 @@ public class SDMove extends ListActivity {
 	
 	String tmp;
 
-    /** Called when the activity is first created. */
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+	/** Called when the activity is first created. */
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
 
-        final List<PkgListItem> pkglist = new ArrayList<PkgListItem>();        
-        PackageManager pm = getPackageManager();
-        
-        
-        for (PackageInfo pkg: pm.getInstalledPackages(0)) {
-        	String packageName;
-        	packageName = pkg.packageName;
-        	if ( packageName == null || packageName == "" ) {
-        		packageName = "android";
-        	}
-        	
-        	// Bad First Attempt
-        	/*
-        	text += pkg.applicationInfo.publicSourceDir;
-        	JarFile apk;
-        	try {
-        		apk = new JarFile(pkg.applicationInfo.publicSourceDir);
+		final List<PkgListItem> pkglist = new ArrayList<PkgListItem>();        
+		PackageManager pm = getPackageManager();
+		
+		
+		for (PackageInfo pkg: pm.getInstalledPackages(0)) {
+			String packageName;
+			packageName = pkg.packageName;
+			if ( packageName == null || packageName == "" ) {
+				packageName = "android";
+			}
+			
+			// Bad First Attempt
+			/*
+			text += pkg.applicationInfo.publicSourceDir;
+			JarFile apk;
+			try {
+				apk = new JarFile(pkg.applicationInfo.publicSourceDir);
 				InputStream apkIS = apk.getInputStream(apk.getEntry("AndroidManifest.xml"));
 				byte buf[];
 				buf = new byte[256];
@@ -116,9 +116,9 @@ public class SDMove extends ListActivity {
 				// TODO Auto-generated catch block
 			}
 			*/
-        	
-        	try {
-        		AssetManager am = createPackageContext(packageName, 0).getAssets();
+			
+			try {
+				AssetManager am = createPackageContext(packageName, 0).getAssets();
 				XmlResourceParser xml = am.openXmlResourceParser("AndroidManifest.xml");
 				try {
 					int eventType = xml.getEventType();
@@ -185,31 +185,31 @@ public class SDMove extends ListActivity {
 				// TODO Auto-generated catch block
 			}
 
-        }
-    
-        setListAdapter(new PkgListItemAdapter(this, android.R.layout.simple_list_item_1, pkglist));
-        ListView lv = getListView();
-        lv.setOnItemClickListener(new OnItemClickListener() {
-        	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        		Intent it = new Intent(Intent.ACTION_VIEW);
+		}
+	
+		setListAdapter(new PkgListItemAdapter(this, android.R.layout.simple_list_item_1, pkglist));
+		ListView lv = getListView();
+		lv.setOnItemClickListener(new OnItemClickListener() {
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				Intent it = new Intent(Intent.ACTION_VIEW);
 
-                it.setClassName("com.android.settings", "com.android.settings.InstalledAppDetails");
-                it.putExtra("com.android.settings.ApplicationPkgName", pkglist.get(position).name);
-                it.putExtra("pkg", pkglist.get(position).pkg.packageName);
+				it.setClassName("com.android.settings", "com.android.settings.InstalledAppDetails");
+				it.putExtra("com.android.settings.ApplicationPkgName", pkglist.get(position).name);
+				it.putExtra("pkg", pkglist.get(position).pkg.packageName);
 
-                List<ResolveInfo> acts = getPackageManager().queryIntentActivities(it, 0);
+				List<ResolveInfo> acts = getPackageManager().queryIntentActivities(it, 0);
 
-                if ( acts.size() > 0 ) {
-                	startActivity(it);
-                }
-                
-                //Toast.makeText(getApplicationContext(), pkglist.get(position).meta, Toast.LENGTH_SHORT).show();
+				if (acts.size() > 0) {
+					startActivity(it);
+				}
+				
+				//Toast.makeText(getApplicationContext(), pkglist.get(position).meta, Toast.LENGTH_SHORT).show();
 
-        	}
-        });
+			}
+		});
 
-        /*
-        try {
+		/*
+		try {
 			PackageInfo tmppkg = pm.getPackageInfo("com.android.providers.applications", PackageManager.GET_RECEIVERS);
 			for (ActivityInfo ai: tmppkg.receivers) {
 				Toast.makeText(getApplicationContext(), ai.name, Toast.LENGTH_LONG).show();
@@ -222,38 +222,38 @@ public class SDMove extends ListActivity {
 		//Toast.makeText(getApplicationContext(), "thing", Toast.LENGTH_LONG);
 		*/
 
-    }
-    
-    protected Dialog onCreateDialog(int id, Bundle args) {
-    	Dialog d = new Dialog(this);
-    	switch (id) {
-    	case 0:
-    		d.setContentView(R.layout.aboutdialog);
-    		d.setTitle("About");
-    		break;
-    	default:
-    		return null;
-    	}		
-    	return d;
+	}
+	
+	protected Dialog onCreateDialog(int id, Bundle args) {
+		Dialog d = new Dialog(this);
+		switch (id) {
+		case 0:
+			d.setContentView(R.layout.aboutdialog);
+			d.setTitle("About");
+			break;
+		default:
+			return null;
+		}		
+		return d;
 	}
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.mainmenu, menu);
-        return true;
-    }
-    
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle item selection
-        switch (item.getItemId()) {
-        case R.id.aboutmenu:
-        	showDialog(0);
-        	return true;
-        default:
-            return super.onOptionsItemSelected(item);
-        }
-    }
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.mainmenu, menu);
+		return true;
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle item selection
+		switch (item.getItemId()) {
+		case R.id.aboutmenu:
+			showDialog(0);
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
 
 }
