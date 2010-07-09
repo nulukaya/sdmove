@@ -4,9 +4,18 @@ package com.beaglebros.SDMove;
 // for pointing me in the right direction for dealing with the apk's xml file
 // <https://www.isecpartners.com/manifest_explorer.html>
 
+// Thanks to Quick System Info's source code for showing me how to open the
+// Application Info manager.
+
+// Thanks to herriojr on #android-dev for 'splainin' to me how my dialog should work
+
 import android.app.Dialog;
 import android.app.ListActivity;
+import android.app.ProgressDialog;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuInflater;
@@ -80,6 +89,7 @@ public class SDMove extends ListActivity {
 	private static final int preferExternal = 2;
 	
 	private static final int ABOUT_DIALOG = 0;
+	private static final int PROGRESS_DIALOG = 1;
 	
 	/** Called when the activity is first created. */
 	@Override
@@ -88,7 +98,46 @@ public class SDMove extends ListActivity {
 
 		final ArrayList<PkgListItem> pkglist = new ArrayList<PkgListItem>();        
 		
+		new AsyncTask<Void,Void,Void>() {
+			@Override
+			public void onPreExecute() {
+				showDialog(PROGRESS_DIALOG);
+			}
+			@Override
+			public void onPostExecute(Void p) {
+				dismissDialog(PROGRESS_DIALOG);
+		        pt.setState(ProgressThread.STATE_DONE);
+				Collections.sort(pkglist, new byPkgName());
+				setListAdapter(new PkgListItemAdapter(SDMove.this, android.R.layout.simple_list_item_1, pkglist));
+				ListView lv = getListView();
+				lv.setOnItemClickListener(new OnItemClickListener() {
+					public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+						Intent it = new Intent(Intent.ACTION_VIEW);
+		
+						it.setClassName("com.android.settings", "com.android.settings.InstalledAppDetails");
+						it.putExtra("com.android.settings.ApplicationPkgName", pkglist.get(position).name);
+						it.putExtra("pkg", pkglist.get(position).pkg.packageName);
+		
+						List<ResolveInfo> acts = getPackageManager().queryIntentActivities(it, 0);
+		
+						if (acts.size() > 0) {
+							startActivity(it);
+						}
+					}
+				});
+			}
+			@Override
+			protected Void doInBackground(Void... params) {
+				getPackages(pkglist);
+				return null;
+			}
+		}.execute();
+		
+		/*
+		showDialog(PROGRESS_DIALOG);
 		getPackages(pkglist);
+		dismissDialog(PROGRESS_DIALOG);
+        pt.setState(ProgressThread.STATE_DONE);
 		
 		Collections.sort(pkglist, new byPkgName());
 	
@@ -109,20 +158,65 @@ public class SDMove extends ListActivity {
 				}
 			}
 		});
+        */
 
 	}
 	
+	ProgressDialog pd;
+	ProgressThread pt;
+	
 	protected Dialog onCreateDialog(int id, Bundle args) {
-		Dialog d = new Dialog(this);
 		switch (id) {
 		case ABOUT_DIALOG:
+			Dialog d = new Dialog(this);
 			d.setContentView(R.layout.aboutdialog);
 			d.setTitle("About");
-			break;
+			return d;
+			//break;
+		case PROGRESS_DIALOG:
+			pd = new ProgressDialog(SDMove.this);
+			pd.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+			pd.setTitle("Please wait");
+			pd.setMessage("Loading packages");
+			pd.setCancelable(true);
+			pt = new ProgressThread(handler);
+			pt.start();
+			return pd;
+			//break;
 		default:
 			return null;
 		}		
-		return d;
+	}
+	
+    final Handler handler = new Handler() {
+        public void handleMessage(Message msg) {
+        }
+    };
+
+	private class ProgressThread extends Thread {
+	    Handler mHandler;
+	    final static int STATE_DONE = 0;
+	    final static int STATE_RUNNING = 1;
+	    int mState;
+	
+	    ProgressThread(Handler h) {
+	        mHandler = h;
+	    }
+	
+	    public void run() {
+	        mState = STATE_RUNNING;   
+	        while (mState == STATE_RUNNING) {
+	            try {
+	                Thread.sleep(100);
+	            } catch (InterruptedException e) {
+	                //Log.e("ERROR", "Thread Interrupted");
+	            }
+	        }
+	    }
+	    
+	    public void setState(int state) {
+	        mState = state;
+	    }
 	}
 
 	@Override
@@ -227,5 +321,6 @@ public class SDMove extends ListActivity {
 		   return(a.toString()).compareToIgnoreCase(b.toString());
 	     }
 	}
+
 
 }
