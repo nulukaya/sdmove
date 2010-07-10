@@ -8,6 +8,8 @@ package com.beaglebros.SDMove;
 // Application Info manager.
 
 // Thanks to herriojr on #android-dev for 'splainin' to me how my dialog should work
+// Thanks also to romainguy and tateitsu for answering my stupid Java questions
+// and to everyone in general on #android-dev for putting up with me
 
 import android.app.Dialog;
 import android.app.ListActivity;
