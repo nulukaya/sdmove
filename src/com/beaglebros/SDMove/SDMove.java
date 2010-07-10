@@ -18,6 +18,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuInflater;
@@ -30,9 +32,11 @@ import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.*;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
+import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -49,9 +53,13 @@ public class SDMove extends ListActivity {
 	private static final int ABOUT_DIALOG = 0;
 	private static final int PROGRESS_DIALOG = 1;
 	
+	private static final String SETTINGS_SORTBY = "sortby";
+	
 	final ArrayList<PkgListItem> pkglist = new ArrayList<PkgListItem>();        
 	
 	PkgListItemAdapter plia;
+	// TODO: get rid of this global variable: sortby
+	Comparator<PkgListItem> sortby;
 	
 	/*
 	class PkgChgReceiver extends BroadcastReceiver {
@@ -67,7 +75,18 @@ public class SDMove extends ListActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
+		
 		//registerReceiver(new PkgChgReceiver(), new IntentFilter(Intent.ACTION_PACKAGE_CHANGED));
+		SharedPreferences settings = getPreferences(MODE_PRIVATE);
+		switch (settings.getInt(SETTINGS_SORTBY, R.id.sortbystatus)) {
+		case R.id.sortbyname:
+			sortby = new byPkgName();
+			break;
+		case R.id.sortbystatus:
+		default:
+			sortby = new byPkgStatus();
+			break;
+		}
 		
 		new AsyncTask<Void,Void,Void>() {
 			@Override
@@ -78,8 +97,9 @@ public class SDMove extends ListActivity {
 			public void onPostExecute(Void p) {
 				dismissDialog(PROGRESS_DIALOG);
 		        pt.setState(ProgressThread.STATE_DONE);
-				Collections.sort(pkglist, new byPkgStatus());
+				Collections.sort(pkglist, sortby);
 				plia = new PkgListItemAdapter(SDMove.this, android.R.layout.simple_list_item_1, pkglist);
+				plia.sorter = sortby;
 				setListAdapter(plia);
 				ListView lv = getListView();
 				lv.setOnItemClickListener(new OnItemClickListener() {
@@ -113,9 +133,40 @@ public class SDMove extends ListActivity {
 	protected Dialog onCreateDialog(int id, Bundle args) {
 		switch (id) {
 		case ABOUT_DIALOG:
+			TextView tv;
+			SpannableString io;
+			
+			Resources r = getResources();
 			Dialog d = new Dialog(this);
+			
 			d.setContentView(R.layout.aboutdialog);
-			d.setTitle("About");
+			d.setTitle(r.getString(R.string.abouttitle));
+			io = new SpannableString(r.getString(R.string.intonly) + " " + r.getString(R.string.intonlydesc));
+			io.setSpan(new ForegroundColorSpan(r.getColor(R.color.intonly)), 0, r.getString(R.string.intonly).length(), 0);
+			tv = (TextView)d.findViewById(R.id.intonlydesc);
+			tv.setText(io);
+			io = new SpannableString(r.getString(R.string.autoext) + " " + r.getString(R.string.autoextdesc));
+			io.setSpan(new ForegroundColorSpan(r.getColor(R.color.autoext)), 0, r.getString(R.string.autoext).length(), 0);
+			tv = (TextView)d.findViewById(R.id.autoextdesc);
+			tv.setText(io);
+			io = new SpannableString(r.getString(R.string.autoint) + " " + r.getString(R.string.autointdesc));
+			io.setSpan(new ForegroundColorSpan(r.getColor(R.color.autoint)), 0, r.getString(R.string.autoint).length(), 0);
+			tv = (TextView)d.findViewById(R.id.autointdesc);
+			tv.setText(io);
+			io = new SpannableString(r.getString(R.string.prefext) + " " + r.getString(R.string.prefextdesc));
+			io.setSpan(new ForegroundColorSpan(r.getColor(R.color.prefext)), 0, r.getString(R.string.prefext).length(), 0);
+			tv = (TextView)d.findViewById(R.id.prefextdesc);
+			tv.setText(io);
+			io = new SpannableString(r.getString(R.string.prefint) + " " + r.getString(R.string.prefintdesc));
+			io.setSpan(new ForegroundColorSpan(r.getColor(R.color.prefint)), 0, r.getString(R.string.prefint).length(), 0);
+			tv = (TextView)d.findViewById(R.id.prefintdesc);
+			tv.setText(io);
+			String tmp = "";
+			for (String s: r.getStringArray(R.array.thanks)) {
+				tmp += s + "\n";
+			}
+			tv = (TextView)d.findViewById(R.id.thanks);
+			tv.setText(tmp);
 			return d;
 			//break;
 		case PROGRESS_DIALOG:
@@ -172,24 +223,34 @@ public class SDMove extends ListActivity {
 		return true;
 	}
 	
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		menu.findItem(getPreferences(MODE_PRIVATE).getInt(SETTINGS_SORTBY, R.id.sortbystatus)).setChecked(true);
+		return true;
+	}
+	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle item selection
+		SharedPreferences settings = getPreferences(MODE_PRIVATE);
 		switch (item.getItemId()) {
 		case R.id.aboutmenu:
 			showDialog(0);
 			return true;
 			// break;
 		case R.id.sortbyname:
-			plia.sort(new byPkgName());
+			plia.sorter = new byPkgName();
+			plia.sort();
 			plia.notifyDataSetChanged();
 			item.setChecked(true);
+			settings.edit().putInt(SETTINGS_SORTBY, R.id.sortbyname).commit();
 			return true;
 			// break;
 		case R.id.sortbystatus:
-			plia.sort(new byPkgStatus());
+			plia.sorter = new byPkgStatus();
+			plia.sort();
 			plia.notifyDataSetChanged();
 			item.setChecked(true);
+			settings.edit().putInt(SETTINGS_SORTBY, R.id.sortbystatus).commit();
 			return true;
 			// break;
 		default:
@@ -278,6 +339,7 @@ public class SDMove extends ListActivity {
 
 class PkgListItemAdapter extends ArrayAdapter<PkgListItem> {
 	Context context;
+	Comparator<PkgListItem> sorter;
 
 	public PkgListItemAdapter(Context context, int layout, List<PkgListItem> pkglist) {
 		super(context, layout, pkglist);
@@ -289,6 +351,10 @@ class PkgListItemAdapter extends ArrayAdapter<PkgListItem> {
 		PkgListItem p = (PkgListItem) this.getItem(position);
 		view.setTextColor(context.getResources().getColor((p.getColor())));
 		return view;
+	}
+	
+	public void sort() {
+		super.sort(sorter);
 	}
 
 }
