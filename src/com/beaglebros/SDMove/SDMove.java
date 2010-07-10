@@ -329,6 +329,11 @@ public class SDMove extends ListActivity {
 			}
 			ret = new Integer(a.storepref).compareTo(b.storepref);
 			if (ret != 0 ) {
+				if (a.storepref == PkgListItem.PKG_STOREPREF_INT) {
+					ret = 1;
+				} else if (b.storepref == PkgListItem.PKG_STOREPREF_INT) {
+					ret = -1;
+				}
 				return ret;
 			}
 			return(a.toString().compareToIgnoreCase(b.toString()));

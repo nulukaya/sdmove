@@ -10,9 +10,9 @@ class PkgListItem {
 	public int storepref;
 	
 	// Experimentally determined
-	private static final int PKG_STOREPREF_AUTO = 0; // auto
-	private static final int PKG_STOREPREF_INT = 1;  // internalOnly
-	private static final int PKG_STOREPREF_EXT = 2;  // preferExternal
+	public static final int PKG_STOREPREF_AUTO = 0; // auto
+	public static final int PKG_STOREPREF_INT = 1;  // internalOnly
+	public static final int PKG_STOREPREF_EXT = 2;  // preferExternal
 	
 	public static final int PKG_STORED_INTERNAL = 0;
 	public static final int PKG_STORED_EXTERNAL = 1;
