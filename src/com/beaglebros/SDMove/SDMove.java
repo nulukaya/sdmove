@@ -9,6 +9,7 @@ package com.beaglebros.SDMove;
 
 // Thanks to herriojr on #android-dev for 'splainin' to me how my dialog should work
 // Thanks also to romainguy and tateitsu for answering my stupid Java questions
+// Thanks also to kroot for making me understand how SpannableString worked
 // and to everyone in general on #android-dev for putting up with me
 
 import android.app.Dialog;
