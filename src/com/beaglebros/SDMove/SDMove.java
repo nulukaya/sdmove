@@ -76,7 +76,6 @@ public class SDMove extends ListActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		
 		//registerReceiver(new PkgChgReceiver(), new IntentFilter(Intent.ACTION_PACKAGE_CHANGED));
 		SharedPreferences settings = getPreferences(MODE_PRIVATE);
 		switch (settings.getInt(SETTINGS_SORTBY, R.id.sortbystatus)) {
@@ -128,7 +127,7 @@ public class SDMove extends ListActivity {
 		
 	}
 	
-	ProgressDialog pd;
+	ProgressDialog pd = null;
 	ProgressThread pt;
 	
 	protected Dialog onCreateDialog(int id, Bundle args) {
@@ -263,13 +262,15 @@ public class SDMove extends ListActivity {
 	private void getPackages(ArrayList<PkgListItem> pkglist) {
 		PackageManager pm = getPackageManager();
 		
-		//String tmp;
-	
 		for (PackageInfo pkg: pm.getInstalledPackages(0)) {
 			String packageName;
 			packageName = pkg.packageName;
 			if ( packageName == null || packageName == "" ) {
 				packageName = "android";
+			}
+			// Update progress thread
+			if (pd != null) {
+				pd.setMessage("Loading package " + packageName);
 			}
 			
 			try {
