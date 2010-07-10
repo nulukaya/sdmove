@@ -32,8 +32,6 @@ import android.content.pm.*;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
 import android.content.res.XmlResourceParser;
-import android.graphics.Color;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,59 +42,30 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 
-class PkgListItem {
-	public PackageInfo pkg;
-	public String name;
-	public String meta;
-	public int color;
-	
-	public PkgListItem(PackageInfo pkgin, String namein, String metain, int colorin) {
-		pkg = pkgin;
-		name = namein;
-		meta = metain;
-		color = colorin;
-	}
-
-	public String toString() {
-		return name;
-	}
-	
-}
-
-@SuppressWarnings("unchecked")
-class PkgListItemAdapter extends ArrayAdapter {
-	Context context;
-
-	public PkgListItemAdapter(Context context, int layout, List<PkgListItem> pkglist) {
-		super(context, layout, pkglist.toArray());
-		this.context = context;
-	}
-	
-	public View getView(int position, View convertView, ViewGroup parent) {
-		TextView view = (TextView)super.getView(position, convertView, parent);
-		PkgListItem p = (PkgListItem) this.getItem(position);
-		view.setTextColor(p.color);
-		return view;
-	}
-
-}
-
 public class SDMove extends ListActivity {
-	
-	// Experimentally determined
-	private static final int auto = 0;
-	private static final int internalOnly = 1;
-	private static final int preferExternal = 2;
 	
 	private static final int ABOUT_DIALOG = 0;
 	private static final int PROGRESS_DIALOG = 1;
+	
+	final ArrayList<PkgListItem> pkglist = new ArrayList<PkgListItem>();        
+	
+	PkgListItemAdapter plia;
+	
+	/*
+	class PkgChgReceiver extends BroadcastReceiver {
+		@Override
+		public void onReceive(Context c, Intent i) {
+			Toast.makeText(SDMove.this, "testing broadcast receive", Toast.LENGTH_LONG).show();
+		}
+	}
+	*/
 	
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		final ArrayList<PkgListItem> pkglist = new ArrayList<PkgListItem>();        
+		
+		//registerReceiver(new PkgChgReceiver(), new IntentFilter(Intent.ACTION_PACKAGE_CHANGED));
 		
 		new AsyncTask<Void,Void,Void>() {
 			@Override
@@ -107,8 +76,9 @@ public class SDMove extends ListActivity {
 			public void onPostExecute(Void p) {
 				dismissDialog(PROGRESS_DIALOG);
 		        pt.setState(ProgressThread.STATE_DONE);
-				Collections.sort(pkglist, new byPkgName());
-				setListAdapter(new PkgListItemAdapter(SDMove.this, android.R.layout.simple_list_item_1, pkglist));
+				Collections.sort(pkglist, new byPkgStatus());
+				plia = new PkgListItemAdapter(SDMove.this, android.R.layout.simple_list_item_1, pkglist);
+				setListAdapter(plia);
 				ListView lv = getListView();
 				lv.setOnItemClickListener(new OnItemClickListener() {
 					public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -133,33 +103,6 @@ public class SDMove extends ListActivity {
 			}
 		}.execute();
 		
-		/*
-		showDialog(PROGRESS_DIALOG);
-		getPackages(pkglist);
-		dismissDialog(PROGRESS_DIALOG);
-        pt.setState(ProgressThread.STATE_DONE);
-		
-		Collections.sort(pkglist, new byPkgName());
-	
-		setListAdapter(new PkgListItemAdapter(this, android.R.layout.simple_list_item_1, pkglist));
-		ListView lv = getListView();
-		lv.setOnItemClickListener(new OnItemClickListener() {
-			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				Intent it = new Intent(Intent.ACTION_VIEW);
-
-				it.setClassName("com.android.settings", "com.android.settings.InstalledAppDetails");
-				it.putExtra("com.android.settings.ApplicationPkgName", pkglist.get(position).name);
-				it.putExtra("pkg", pkglist.get(position).pkg.packageName);
-
-				List<ResolveInfo> acts = getPackageManager().queryIntentActivities(it, 0);
-
-				if (acts.size() > 0) {
-					startActivity(it);
-				}
-			}
-		});
-        */
-
 	}
 	
 	ProgressDialog pd;
@@ -194,7 +137,8 @@ public class SDMove extends ListActivity {
     };
 
 	private class ProgressThread extends Thread {
-	    Handler mHandler;
+	    @SuppressWarnings("unused")
+		Handler mHandler;
 	    final static int STATE_DONE = 0;
 	    final static int STATE_RUNNING = 1;
 	    int mState;
@@ -233,15 +177,29 @@ public class SDMove extends ListActivity {
 		case R.id.aboutmenu:
 			showDialog(0);
 			return true;
+			// break;
+		case R.id.sortbyname:
+			plia.sort(new byPkgName());
+			plia.notifyDataSetChanged();
+			item.setChecked(true);
+			return true;
+			// break;
+		case R.id.sortbystatus:
+			plia.sort(new byPkgStatus());
+			plia.notifyDataSetChanged();
+			item.setChecked(true);
+			return true;
+			// break;
 		default:
 			return super.onOptionsItemSelected(item);
+			// break;
 		}
 	}
 
 	private void getPackages(ArrayList<PkgListItem> pkglist) {
 		PackageManager pm = getPackageManager();
 		
-		String tmp;
+		//String tmp;
 	
 		for (PackageInfo pkg: pm.getInstalledPackages(0)) {
 			String packageName;
@@ -265,34 +223,11 @@ public class SDMove extends ListActivity {
 									attrloop:
 									for (int j = 0; j < xml.getAttributeCount(); j++) {
 										if (xml.getAttributeName(j).matches("installLocation")) {
-											switch (Integer.parseInt(xml.getAttributeValue(j))) {
-											case auto:
-												tmp = "May Be Moved\n";
-												if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0) {
-													tmp += "(already moved)";
-													pkglist.add(new PkgListItem(pkg, pkg.applicationInfo.loadLabel(pm).toString(), tmp, Color.GREEN));
-												} else {
-													tmp += "(not already moved)";
-													pkglist.add(new PkgListItem(pkg, pkg.applicationInfo.loadLabel(pm).toString(), tmp, Color.YELLOW));
-												}
-												break;
-											case internalOnly:
-												pkglist.add(new PkgListItem(pkg, pkg.applicationInfo.loadLabel(pm).toString(), "Cannot Be Moved", Color.RED));
-												break;
-											case preferExternal:
-												tmp = "External Storage Preferred\n";
-												if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0) {
-													tmp += "(already moved)";
-													pkglist.add(new PkgListItem(pkg, pkg.applicationInfo.loadLabel(pm).toString(), tmp, Color.BLUE));
-												} else {
-													tmp += "(not already moved)";
-													pkglist.add(new PkgListItem(pkg, pkg.applicationInfo.loadLabel(pm).toString(), tmp, Color.CYAN));
-												}
-												break;
-											default:
-												pkglist.add(new PkgListItem(pkg, pkg.applicationInfo.loadLabel(pm).toString(), "Crazy Wackiness!", Color.MAGENTA));
-												break;
-											}
+											pkglist.add(new PkgListItem(
+													pkg,
+													pkg.applicationInfo.loadLabel(pm).toString(),
+													((pkg.applicationInfo.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) == 0)?PkgListItem.PKG_STORED_INTERNAL:PkgListItem.PKG_STORED_EXTERNAL,
+													Integer.parseInt(xml.getAttributeValue(j))));
 											break attrloop;
 										}
 									}
@@ -322,5 +257,36 @@ public class SDMove extends ListActivity {
 	     }
 	}
 
+	private final class byPkgStatus implements Comparator<PkgListItem> {
+		public int compare(PkgListItem a, PkgListItem b) {
+			int ret;
+			ret = new Integer(a.stored).compareTo(b.stored);
+			if (ret != 0 ) {
+				return ret;
+			}
+			ret = new Integer(a.storepref).compareTo(b.storepref);
+			if (ret != 0 ) {
+				return ret;
+			}
+			return(a.toString().compareToIgnoreCase(b.toString()));
+		}
+	}
+
+}
+
+class PkgListItemAdapter extends ArrayAdapter<PkgListItem> {
+	Context context;
+
+	public PkgListItemAdapter(Context context, int layout, List<PkgListItem> pkglist) {
+		super(context, layout, pkglist);
+		this.context = context;
+	}
+	
+	public View getView(int position, View convertView, ViewGroup parent) {
+		TextView view = (TextView)super.getView(position, convertView, parent);
+		PkgListItem p = (PkgListItem) this.getItem(position);
+		view.setTextColor(context.getResources().getColor((p.getColor())));
+		return view;
+	}
 
 }

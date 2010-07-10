@@ -9,4 +9,8 @@
 	<string name="prefintdesc">indicates that the app prefers being on external storage, but is installed to internal storage anyway</string>
 	<string name="thanks">Thanks to iSec Partners for providing the source code to Manifest Explorer, which pointed me in the right direction in parsing the AndroidManifest file.  Thanks to the guys at QuickSystemInfo for providing their source code, which showed me how to directly open the Application Info program.</string>
 	<string name="copyright">Copyright ©2010, Bitt Faulk</string>
+<string name="aboutmenu">About</string>
+<string name="sortmenu">Sort</string>
+<string name="sortbyname">Sort by Name</string>
+<string name="sortbystatus">Sort by Status</string>
 </resources>
