@@ -127,7 +127,7 @@ public class SDMove extends ListActivity {
 		
 	}
 	
-	ProgressDialog pd = null;
+	ProgressDialog pd;
 	ProgressThread pt;
 	
 	protected Dialog onCreateDialog(int id, Bundle args) {
@@ -267,10 +267,6 @@ public class SDMove extends ListActivity {
 			packageName = pkg.packageName;
 			if ( packageName == null || packageName == "" ) {
 				packageName = "android";
-			}
-			// Update progress thread
-			if (pd != null) {
-				pd.setMessage("Loading package " + packageName);
 			}
 			
 			try {
