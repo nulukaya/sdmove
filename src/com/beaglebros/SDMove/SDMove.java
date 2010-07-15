@@ -56,11 +56,7 @@ public class SDMove extends ListActivity {
 	
 	private static final String SETTINGS_SORTBY = "sortby";
 	
-	final ArrayList<PkgListItem> pkglist = new ArrayList<PkgListItem>();        
-	
 	PkgListItemAdapter plia;
-	// TODO: get rid of this global variable: sortby
-	Comparator<PkgListItem> sortby;
 	
 	/*
 	class PkgChgReceiver extends BroadcastReceiver {
@@ -71,60 +67,85 @@ public class SDMove extends ListActivity {
 	}
 	*/
 	
+	@Override
+	public Object onRetainNonConfigurationInstance() {
+	    final ArrayList<PkgListItem> data = new ArrayList<PkgListItem>();
+	    for (int i=0; i<plia.getCount(); i++) {
+	    	data.add(plia.getItem(i));
+	    }
+	    return data;
+	}
+	
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
 		//registerReceiver(new PkgChgReceiver(), new IntentFilter(Intent.ACTION_PACKAGE_CHANGED));
+		
+		Object data = getLastNonConfigurationInstance();
+		if (data != null) {
+			populateAdapter((ArrayList<PkgListItem>)data, getSortPref());
+		} else {
+		
+			new AsyncTask<Void,Void,Void>() {
+				ArrayList<PkgListItem> pat;
+				@Override
+				public void onPreExecute() {
+					showDialog(PROGRESS_DIALOG);
+				}
+				@Override
+				public void onPostExecute(Void p) {
+					dismissDialog(PROGRESS_DIALOG);
+			        pt.setState(ProgressThread.STATE_DONE);
+					populateAdapter(pat, getSortPref());
+				}
+				@Override
+				protected Void doInBackground(Void... params) {
+					pat = new ArrayList<PkgListItem>();
+					getPackages(pat);
+					return null;
+				}
+			}.execute();
+			
+		}
+		
+	}
+
+	private Comparator<PkgListItem> getSortPref() {
 		SharedPreferences settings = getPreferences(MODE_PRIVATE);
 		switch (settings.getInt(SETTINGS_SORTBY, R.id.sortbystatus)) {
 		case R.id.sortbyname:
-			sortby = new byPkgName();
-			break;
+			return new byPkgName();
+			//break;
 		case R.id.sortbystatus:
 		default:
-			sortby = new byPkgStatus();
-			break;
+			return new byPkgStatus();
+			//break;
 		}
-		
-		new AsyncTask<Void,Void,Void>() {
-			@Override
-			public void onPreExecute() {
-				showDialog(PROGRESS_DIALOG);
+	}
+	
+	private void populateAdapter(ArrayList<PkgListItem> pap, Comparator<PkgListItem> s) {
+		Collections.sort(pap, s);
+		plia = new PkgListItemAdapter(SDMove.this, android.R.layout.simple_list_item_1, pap);
+		plia.sorter = s;
+		setListAdapter(plia);
+		ListView lv = getListView();
+		lv.setOnItemClickListener(new OnItemClickListener() {
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				Intent it = new Intent(Intent.ACTION_VIEW);
+
+				it.setClassName("com.android.settings", "com.android.settings.InstalledAppDetails");
+				it.putExtra("com.android.settings.ApplicationPkgName", plia.getItem(position).name);
+				it.putExtra("pkg", plia.getItem(position).pkg.packageName);
+
+				List<ResolveInfo> acts = getPackageManager().queryIntentActivities(it, 0);
+
+				if (acts.size() > 0) {
+					startActivity(it);
+				}
 			}
-			@Override
-			public void onPostExecute(Void p) {
-				dismissDialog(PROGRESS_DIALOG);
-		        pt.setState(ProgressThread.STATE_DONE);
-				Collections.sort(pkglist, sortby);
-				plia = new PkgListItemAdapter(SDMove.this, android.R.layout.simple_list_item_1, pkglist);
-				plia.sorter = sortby;
-				setListAdapter(plia);
-				ListView lv = getListView();
-				lv.setOnItemClickListener(new OnItemClickListener() {
-					public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-						Intent it = new Intent(Intent.ACTION_VIEW);
-		
-						it.setClassName("com.android.settings", "com.android.settings.InstalledAppDetails");
-						it.putExtra("com.android.settings.ApplicationPkgName", pkglist.get(position).name);
-						it.putExtra("pkg", pkglist.get(position).pkg.packageName);
-		
-						List<ResolveInfo> acts = getPackageManager().queryIntentActivities(it, 0);
-		
-						if (acts.size() > 0) {
-							startActivity(it);
-						}
-					}
-				});
-			}
-			@Override
-			protected Void doInBackground(Void... params) {
-				getPackages(pkglist);
-				return null;
-			}
-		}.execute();
-		
+		});
 	}
 	
 	ProgressDialog pd;
@@ -240,7 +261,6 @@ public class SDMove extends ListActivity {
 		case R.id.sortbyname:
 			plia.sorter = new byPkgName();
 			plia.sort();
-			plia.notifyDataSetChanged();
 			item.setChecked(true);
 			settings.edit().putInt(SETTINGS_SORTBY, R.id.sortbyname).commit();
 			return true;
@@ -248,7 +268,6 @@ public class SDMove extends ListActivity {
 		case R.id.sortbystatus:
 			plia.sorter = new byPkgStatus();
 			plia.sort();
-			plia.notifyDataSetChanged();
 			item.setChecked(true);
 			settings.edit().putInt(SETTINGS_SORTBY, R.id.sortbystatus).commit();
 			return true;
@@ -259,7 +278,7 @@ public class SDMove extends ListActivity {
 		}
 	}
 
-	private void getPackages(ArrayList<PkgListItem> pkglist) {
+	private void getPackages(ArrayList<PkgListItem> p) {
 		PackageManager pm = getPackageManager();
 		
 		for (PackageInfo pkg: pm.getInstalledPackages(0)) {
@@ -284,7 +303,7 @@ public class SDMove extends ListActivity {
 									attrloop:
 									for (int j = 0; j < xml.getAttributeCount(); j++) {
 										if (xml.getAttributeName(j).matches("installLocation")) {
-											pkglist.add(new PkgListItem(
+											p.add(new PkgListItem(
 													pkg,
 													pkg.applicationInfo.loadLabel(pm).toString(),
 													((pkg.applicationInfo.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) == 0)?PkgListItem.PKG_STORED_INTERNAL:PkgListItem.PKG_STORED_EXTERNAL,
@@ -344,8 +363,8 @@ class PkgListItemAdapter extends ArrayAdapter<PkgListItem> {
 	Context context;
 	Comparator<PkgListItem> sorter;
 
-	public PkgListItemAdapter(Context context, int layout, List<PkgListItem> pkglist) {
-		super(context, layout, pkglist);
+	public PkgListItemAdapter(Context context, int layout, List<PkgListItem> p) {
+		super(context, layout, p);
 		this.context = context;
 	}
 	
@@ -358,6 +377,7 @@ class PkgListItemAdapter extends ArrayAdapter<PkgListItem> {
 	
 	public void sort() {
 		super.sort(sorter);
+		this.notifyDataSetChanged();
 	}
 
 }
