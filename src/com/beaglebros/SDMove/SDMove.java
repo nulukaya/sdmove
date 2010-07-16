@@ -55,6 +55,10 @@ public class SDMove extends ListActivity {
 	private static final int PROGRESS_DIALOG = 1;
 	
 	private static final String SETTINGS_SORTBY = "sortby";
+	// if adding more SETTINGS_SORTBY, fix switch at DUMBASSBUG
+	private static final int SETTINGS_SORTBY_NAME = 1;
+	private static final int SETTINGS_SORTBY_STATUS = 2;
+	private static final int SETTINGS_SORTBY_DEFAULT = SETTINGS_SORTBY_STATUS;
 	
 	PkgListItemAdapter plia;
 	
@@ -114,11 +118,11 @@ public class SDMove extends ListActivity {
 
 	private Comparator<PkgListItem> getSortPref() {
 		SharedPreferences settings = getPreferences(MODE_PRIVATE);
-		switch (settings.getInt(SETTINGS_SORTBY, R.id.sortbystatus)) {
-		case R.id.sortbyname:
+		switch (settings.getInt(SETTINGS_SORTBY, SETTINGS_SORTBY_DEFAULT)) {
+		case SETTINGS_SORTBY_NAME:
 			return new byPkgName();
 			//break;
-		case R.id.sortbystatus:
+		case SETTINGS_SORTBY_STATUS:
 		default:
 			return new byPkgStatus();
 			//break;
@@ -245,7 +249,30 @@ public class SDMove extends ListActivity {
 	}
 	
 	public boolean onPrepareOptionsMenu(Menu menu) {
-		menu.findItem(getPreferences(MODE_PRIVATE).getInt(SETTINGS_SORTBY, R.id.sortbystatus)).setChecked(true);
+		int sb = getPreferences(MODE_PRIVATE).getInt(SETTINGS_SORTBY, SETTINGS_SORTBY_DEFAULT);
+		
+		/* 
+		 * DUMBASSBUG
+		 * 
+		 * This seems insane, but I had an early bug that used R.id.sortby*
+		 * as the SETTINGS_SORTBY value.  Unfortunately, those identifiers
+		 * can and do change between builds.
+		 * 
+		 * So now I have to check the setting every time to make sure it's
+		 * valid, as there could be a bogus setting from a prior version.
+		 * 
+		 */
+		switch (sb) {
+		case SETTINGS_SORTBY_NAME:
+			sb = R.id.sortbyname;
+			break;
+		case SETTINGS_SORTBY_STATUS:
+		default:
+			sb = R.id.sortbystatus;
+			break;
+		}
+		
+		menu.findItem(sb).setChecked(true);
 		return true;
 	}
 	
@@ -262,14 +289,14 @@ public class SDMove extends ListActivity {
 			plia.sorter = new byPkgName();
 			plia.sort();
 			item.setChecked(true);
-			settings.edit().putInt(SETTINGS_SORTBY, R.id.sortbyname).commit();
+			settings.edit().putInt(SETTINGS_SORTBY, SETTINGS_SORTBY_NAME).commit();
 			return true;
 			// break;
 		case R.id.sortbystatus:
 			plia.sorter = new byPkgStatus();
 			plia.sort();
 			item.setChecked(true);
-			settings.edit().putInt(SETTINGS_SORTBY, R.id.sortbystatus).commit();
+			settings.edit().putInt(SETTINGS_SORTBY, SETTINGS_SORTBY_STATUS).commit();
 			return true;
 			// break;
 		default:
