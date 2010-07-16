@@ -21,6 +21,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.Html;
 import android.text.SpannableString;
+import android.text.method.LinkMovementMethod;
 import android.text.style.ForegroundColorSpan;
 import android.text.util.Linkify;
 import android.view.Menu;
@@ -195,8 +196,8 @@ public class SDMove extends ListActivity {
 				tmp += s + "\n";
 			}
 			tv = (TextView)d.findViewById(R.id.thanks);
+			tv.setMovementMethod(LinkMovementMethod.getInstance());
 			tv.setText(Html.fromHtml(tmp));
-			Linkify.addLinks(tv, Linkify.ALL);
 			return d;
 			//break;
 		case PROGRESS_DIALOG:
