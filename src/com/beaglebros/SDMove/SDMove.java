@@ -19,8 +19,10 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.Html;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
+import android.text.util.Linkify;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuInflater;
@@ -87,9 +89,11 @@ public class SDMove extends ListActivity {
 		
 		//registerReceiver(new PkgChgReceiver(), new IntentFilter(Intent.ACTION_PACKAGE_CHANGED));
 		
-		Object data = getLastNonConfigurationInstance();
+		@SuppressWarnings("unchecked") // for "data" only
+		ArrayList<PkgListItem> data = (ArrayList<PkgListItem>) getLastNonConfigurationInstance();
+		
 		if (data != null) {
-			populateAdapter((ArrayList<PkgListItem>)data, getSortPref());
+			populateAdapter(data, getSortPref());
 		} else {
 		
 			new AsyncTask<Void,Void,Void>() {
@@ -191,7 +195,8 @@ public class SDMove extends ListActivity {
 				tmp += s + "\n";
 			}
 			tv = (TextView)d.findViewById(R.id.thanks);
-			tv.setText(tmp);
+			tv.setText(Html.fromHtml(tmp));
+			Linkify.addLinks(tv, Linkify.ALL);
 			return d;
 			//break;
 		case PROGRESS_DIALOG:
