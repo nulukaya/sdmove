@@ -1,7 +1,15 @@
 package com.beaglebros.SDMove;
 
 
+import java.util.Comparator;
+import java.util.List;
+
+import android.content.Context;
 import android.content.pm.PackageInfo;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.TextView;
 
 class PkgListItem {
 	public PackageInfo pkg;
@@ -76,4 +84,27 @@ class PkgListItem {
 		return ret;
 	}
 	
+}
+
+class PkgListItemAdapter extends ArrayAdapter<PkgListItem> {
+	Context context;
+	Comparator<PkgListItem> sorter;
+
+	public PkgListItemAdapter(Context context, int layout, List<PkgListItem> p) {
+		super(context, layout, p);
+		this.context = context;
+	}
+	
+	public View getView(int position, View convertView, ViewGroup parent) {
+		TextView view = (TextView)super.getView(position, convertView, parent);
+		PkgListItem p = (PkgListItem) this.getItem(position);
+		view.setTextColor(context.getResources().getColor((p.getColor())));
+		return view;
+	}
+	
+	public void sort() {
+		super.sort(sorter);
+		this.notifyDataSetChanged();
+	}
+
 }

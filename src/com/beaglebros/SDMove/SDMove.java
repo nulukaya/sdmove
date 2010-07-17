@@ -28,13 +28,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.*;
@@ -388,29 +385,6 @@ public class SDMove extends ListActivity {
 			}
 			return(a.toString().compareToIgnoreCase(b.toString()));
 		}
-	}
-
-}
-
-class PkgListItemAdapter extends ArrayAdapter<PkgListItem> {
-	Context context;
-	Comparator<PkgListItem> sorter;
-
-	public PkgListItemAdapter(Context context, int layout, List<PkgListItem> p) {
-		super(context, layout, p);
-		this.context = context;
-	}
-	
-	public View getView(int position, View convertView, ViewGroup parent) {
-		TextView view = (TextView)super.getView(position, convertView, parent);
-		PkgListItem p = (PkgListItem) this.getItem(position);
-		view.setTextColor(context.getResources().getColor((p.getColor())));
-		return view;
-	}
-	
-	public void sort() {
-		super.sort(sorter);
-		this.notifyDataSetChanged();
 	}
 
 }
