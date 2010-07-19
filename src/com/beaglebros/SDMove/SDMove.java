@@ -14,6 +14,7 @@ package com.beaglebros.SDMove;
 // and to everyone in general on #android-dev for putting up with me
 
 import android.app.Dialog;
+import android.app.ExpandableListActivity;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
@@ -49,7 +50,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 
-public class SDMove extends ListActivity {
+public class SDMove extends ExpandableListActivity {
 	
 	private static final int ABOUT_DIALOG = 0;
 	private static final int PROGRESS_DIALOG = 1;
@@ -61,8 +62,11 @@ public class SDMove extends ListActivity {
 	private static final int SETTINGS_SORTBY_DEFAULT = SETTINGS_SORTBY_STATUS;
 	
 	PkgListAdapter plia;
-	ArrayList<PkgListItem> ee, ei, ae, ai, io;
-	List<ArrayList<PkgListItem>> pll;
+	ExpandablePkgListAdapter eplia;
+	
+	ProgressDialog pd;
+	ProgressThread pt;
+	
 	
 	/*
 	class PkgChgReceiver extends BroadcastReceiver {
@@ -110,7 +114,7 @@ public class SDMove extends ListActivity {
 				}
 				@Override
 				protected Void doInBackground(Void... params) {
-					pat = new PkgList();
+					pat = new PkgList("all");
 					getPackages(pat);
 					return null;
 				}
@@ -135,10 +139,11 @@ public class SDMove extends ListActivity {
 	
 	private void populateAdapter(PkgList pap, Comparator<PkgListItem> s) {
 		Collections.sort(pap, s);
-		plia = new PkgListAdapter(SDMove.this, android.R.layout.simple_list_item_1, pap);
-		plia.sorter = s;
-		setListAdapter(plia);
-		ListView lv = getListView();
+		eplia = new ExpandablePkgListAdapter(SDMove.this, android.R.layout.simple_expandable_list_item_1, android.R.layout.simple_list_item_1);
+		eplia.addGroup(pap);
+		//plia.sorter = s;
+		setListAdapter(eplia);
+		ListView lv = getExpandableListView();
 		lv.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				Intent it = new Intent(Intent.ACTION_VIEW);
@@ -155,9 +160,6 @@ public class SDMove extends ListActivity {
 			}
 		});
 	}
-	
-	ProgressDialog pd;
-	ProgressThread pt;
 	
 	protected Dialog onCreateDialog(int id, Bundle args) {
 		switch (id) {
@@ -310,7 +312,7 @@ public class SDMove extends ListActivity {
 		}
 	}
 
-	private void getPackages(ArrayList<PkgListItem> p) {
+	private void getPackages(PkgList p) {
 		PackageManager pm = getPackageManager();
 		
 		for (PackageInfo pkg: pm.getInstalledPackages(0)) {

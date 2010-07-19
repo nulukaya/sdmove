@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import android.content.Context;
 import android.content.pm.PackageInfo;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -127,23 +128,41 @@ class PkgListAdapter extends ArrayAdapter<PkgListItem> {
 }
 
 class ExpandablePkgListAdapter extends BaseExpandableListAdapter {
-	ArrayList<PkgList> pll;
-	Context context;
+	private ArrayList<PkgList> pll;
+	private Context context;
+	private int groupLayout;
+	private int childLayout;
 	
 	public static final int MAX_GROUPS = 1000;
 	
-	public ExpandablePkgListAdapter(Context c) {
+	public ExpandablePkgListAdapter(Context c, int gl, int cl) {
 		pll = new ArrayList<PkgList>();
 		context = c;
+		groupLayout = gl;
+		childLayout = cl;
 	}
 	
-	public ExpandablePkgListAdapter(Context c, ArrayList<PkgList> pllin) {
+	public ExpandablePkgListAdapter(Context c, int gl, int cl, ArrayList<PkgList> pllin) {
 		pll = pllin;
 		context = c;
+		groupLayout = gl;
+		childLayout = cl;
 	}
 	
 	public boolean addGroup(PkgList plin) {
+		if (pll.size() >= MAX_GROUPS) 
+			return false;
 		return pll.add(plin);
+	}
+	
+	public boolean addGroup(String s) {
+		if (pll.size() >= MAX_GROUPS) 
+			return false;
+		return pll.add(new PkgList(s));
+	}
+	
+	public boolean addChild(PkgListItem pin, int groupPosition) {
+		return pll.get(groupPosition).add(pin);
 	}
 
 	public Object getChild(int groupPosition, int childPosition) {
@@ -156,7 +175,8 @@ class ExpandablePkgListAdapter extends BaseExpandableListAdapter {
 
 	public View getChildView(int groupPosition, int childPosition,
 			boolean isLastChild, View convertView, ViewGroup parent) {
-		TextView view = new TextView(context);
+		LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		TextView view = (TextView)inflater.inflate(childLayout, parent, false);
 		view.setText(pll.get(groupPosition).get(childPosition).toString());
 		return view;
 	}
@@ -179,7 +199,8 @@ class ExpandablePkgListAdapter extends BaseExpandableListAdapter {
 
 	public View getGroupView(int groupPosition, boolean isExpanded,
 			View convertView, ViewGroup parent) {
-		TextView view = new TextView(context);
+		LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		TextView view = (TextView)inflater.inflate(groupLayout, parent, false);
 		view.setText(pll.get(groupPosition).toString());
 		return view;
 	}
