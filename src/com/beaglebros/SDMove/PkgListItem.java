@@ -1,15 +1,32 @@
 package com.beaglebros.SDMove;
 
-
+import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
-
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
+
+class PkgList extends ArrayList<PkgListItem> {
+	private static final long serialVersionUID = 2531887428352785853L;
+	public String title;
+	
+	public PkgList() {
+		super();
+	}
+	
+	public PkgList(final String tin) {
+		super();
+		title = tin;
+	}
+	
+	public String toString() {
+		return title;
+	}
+}
 
 class PkgListItem {
 	public PackageInfo pkg;
@@ -86,18 +103,18 @@ class PkgListItem {
 	
 }
 
-class PkgListItemAdapter extends ArrayAdapter<PkgListItem> {
+class PkgListAdapter extends ArrayAdapter<PkgListItem> {
 	Context context;
 	Comparator<PkgListItem> sorter;
 
-	public PkgListItemAdapter(Context context, int layout, List<PkgListItem> p) {
-		super(context, layout, p);
-		this.context = context;
+	public PkgListAdapter(Context c, int layout, PkgList p) {
+		super(c, layout, p);
+		context = c;
 	}
 	
 	public View getView(int position, View convertView, ViewGroup parent) {
 		TextView view = (TextView)super.getView(position, convertView, parent);
-		PkgListItem p = (PkgListItem) this.getItem(position);
+		PkgListItem p = (PkgListItem)this.getItem(position);
 		view.setTextColor(context.getResources().getColor((p.getColor())));
 		return view;
 	}
@@ -107,4 +124,72 @@ class PkgListItemAdapter extends ArrayAdapter<PkgListItem> {
 		this.notifyDataSetChanged();
 	}
 
+}
+
+class ExpandablePkgListAdapter extends BaseExpandableListAdapter {
+	ArrayList<PkgList> pll;
+	Context context;
+	
+	public static final int MAX_GROUPS = 1000;
+	
+	public ExpandablePkgListAdapter(Context c) {
+		pll = new ArrayList<PkgList>();
+		context = c;
+	}
+	
+	public ExpandablePkgListAdapter(Context c, ArrayList<PkgList> pllin) {
+		pll = pllin;
+		context = c;
+	}
+	
+	public boolean addGroup(PkgList plin) {
+		return pll.add(plin);
+	}
+
+	public Object getChild(int groupPosition, int childPosition) {
+		return pll.get(groupPosition).get(childPosition);
+	}
+
+	public long getChildId(int groupPosition, int childPosition) {
+		return ((childPosition + 1) * MAX_GROUPS) + (groupPosition + 1);
+	}
+
+	public View getChildView(int groupPosition, int childPosition,
+			boolean isLastChild, View convertView, ViewGroup parent) {
+		TextView view = new TextView(context);
+		view.setText(pll.get(groupPosition).get(childPosition).toString());
+		return view;
+	}
+
+	public int getChildrenCount(int groupPosition) {
+		return pll.get(groupPosition).size();
+	}
+
+	public Object getGroup(int groupPosition) {
+		return pll.get(groupPosition);
+	}
+
+	public int getGroupCount() {
+		return pll.size();
+	}
+
+	public long getGroupId(int groupPosition) {
+		return groupPosition + 1;
+	}
+
+	public View getGroupView(int groupPosition, boolean isExpanded,
+			View convertView, ViewGroup parent) {
+		TextView view = new TextView(context);
+		view.setText(pll.get(groupPosition).toString());
+		return view;
+	}
+
+	public boolean hasStableIds() {
+		return false;
+	}
+
+	public boolean isChildSelectable(int groupPosition, int childPosition) {
+		return true;
+	}
+	
 }

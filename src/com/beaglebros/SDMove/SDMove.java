@@ -60,7 +60,9 @@ public class SDMove extends ListActivity {
 	private static final int SETTINGS_SORTBY_STATUS = 2;
 	private static final int SETTINGS_SORTBY_DEFAULT = SETTINGS_SORTBY_STATUS;
 	
-	PkgListItemAdapter plia;
+	PkgListAdapter plia;
+	ArrayList<PkgListItem> ee, ei, ae, ai, io;
+	List<ArrayList<PkgListItem>> pll;
 	
 	/*
 	class PkgChgReceiver extends BroadcastReceiver {
@@ -87,15 +89,15 @@ public class SDMove extends ListActivity {
 		
 		//registerReceiver(new PkgChgReceiver(), new IntentFilter(Intent.ACTION_PACKAGE_CHANGED));
 		
-		@SuppressWarnings("unchecked") // for "data" only
-		ArrayList<PkgListItem> data = (ArrayList<PkgListItem>) getLastNonConfigurationInstance();
+		//@SuppressWarnings("unchecked") // for "data" only
+		PkgList data = (PkgList)getLastNonConfigurationInstance();
 		
 		if (data != null) {
 			populateAdapter(data, getSortPref());
 		} else {
 		
 			new AsyncTask<Void,Void,Void>() {
-				ArrayList<PkgListItem> pat;
+				PkgList pat;
 				@Override
 				public void onPreExecute() {
 					showDialog(PROGRESS_DIALOG);
@@ -108,7 +110,7 @@ public class SDMove extends ListActivity {
 				}
 				@Override
 				protected Void doInBackground(Void... params) {
-					pat = new ArrayList<PkgListItem>();
+					pat = new PkgList();
 					getPackages(pat);
 					return null;
 				}
@@ -131,9 +133,9 @@ public class SDMove extends ListActivity {
 		}
 	}
 	
-	private void populateAdapter(ArrayList<PkgListItem> pap, Comparator<PkgListItem> s) {
+	private void populateAdapter(PkgList pap, Comparator<PkgListItem> s) {
 		Collections.sort(pap, s);
-		plia = new PkgListItemAdapter(SDMove.this, android.R.layout.simple_list_item_1, pap);
+		plia = new PkgListAdapter(SDMove.this, android.R.layout.simple_list_item_1, pap);
 		plia.sorter = s;
 		setListAdapter(plia);
 		ListView lv = getListView();
