@@ -158,6 +158,12 @@ public class SDMove extends ListActivity {
 		Collections.sort(pap, s);
 		plia = new PkgListItemAdapter(SDMove.this, R.layout.pkglistitemview, getPreferences(MODE_PRIVATE).getInt(SETTINGS_VIEWSIZE, SETTINGS_VIEWSIZE_DEFAULT), pap);
 		plia.sorter = s;
+		SharedPreferences settings = getPreferences(MODE_PRIVATE);
+		for (int i = 0; i < plia.size; i++) {
+			if (settings.contains("ignore-" + plia.getItem(i).name)) {
+				plia.remove(plia.getItem(i));
+			}
+		}
 		setListAdapter(plia);
 		ListView lv = getListView();
 		lv.setOnItemClickListener(new OnItemClickListener() {
