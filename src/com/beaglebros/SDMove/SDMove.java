@@ -192,6 +192,8 @@ public class SDMove extends ListActivity {
 	}
 	
 	private void addIgnore(String pkg) {
+		SharedPreferences settings = getPreferences(MODE_PRIVATE);
+		settings.edit().putBoolean("ignore-" + pkg, true).commit();
 	}
 	
 	ProgressDialog pd;
