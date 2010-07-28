@@ -24,7 +24,6 @@ import android.text.Html;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ForegroundColorSpan;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -48,6 +47,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -160,13 +160,9 @@ public class SDMove extends ListActivity {
 		Collections.sort(pap, s);
 		plia = new PkgListItemAdapter(SDMove.this, R.layout.pkglistitemview, getPreferences(MODE_PRIVATE).getInt(SETTINGS_VIEWSIZE, SETTINGS_VIEWSIZE_DEFAULT), pap);
 		plia.sorter = s;
-		Log.e("SDMove", "test log");
 		SharedPreferences settings = getPreferences(MODE_PRIVATE);
 		for (int i = 0; i < plia.getCount(); i++) {
-			Log.e("SDMove", Integer.toString(i) + "/" + Integer.toString(plia.getCount()));
-			Log.e("SDMove", plia.getItem(i).name);
 			if (settings.contains(IGNOREPREF + plia.getItem(i).name)) {
-				Log.e("SDMove", "ignoring " + plia.getItem(i).name);
 				plia.remove(plia.getItem(i));
 				i--; // because the remove causes the positions of the following items to shift down
 			}
@@ -207,6 +203,16 @@ public class SDMove extends ListActivity {
 	private void addIgnore(String pkg) {
 		SharedPreferences settings = getPreferences(MODE_PRIVATE);
 		settings.edit().putBoolean(IGNOREPREF + pkg, true).commit();
+	}
+	
+	private void clearIgnores() {
+		SharedPreferences settings = getPreferences(MODE_PRIVATE);
+		Set<String> s = settings.getAll().keySet();
+		for (String key: s) {
+			if (key.startsWith(IGNOREPREF)) {
+				settings.edit().remove(key).commit();
+			}
+		}
 	}
 	
 	ProgressDialog pd;
@@ -389,6 +395,10 @@ public class SDMove extends ListActivity {
 			item.setChecked(true);
 			settings.edit().putInt(SETTINGS_VIEWSIZE, SETTINGS_VIEWSIZE_SMALL).commit();
 			return true;
+			//break;
+		case R.id.clearignoremenu:
+			clearIgnores();
+			return(true);
 			//break;
 		default:
 			return super.onOptionsItemSelected(item);

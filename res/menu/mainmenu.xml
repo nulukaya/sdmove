@@ -23,4 +23,5 @@
 			</group>
 		</menu>
 	</item>
+<item android:title="Clear Ignores" android:id="@+id/clearignoremenu" android:titleCondensed="Unignore" android:icon="@android:drawable/ic_menu_revert"></item>
 </menu>
