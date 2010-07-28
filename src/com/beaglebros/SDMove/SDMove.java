@@ -59,6 +59,11 @@ public class SDMove extends ListActivity {
 	private static final int SETTINGS_SORTBY_NAME = 1;
 	private static final int SETTINGS_SORTBY_STATUS = 2;
 	private static final int SETTINGS_SORTBY_DEFAULT = SETTINGS_SORTBY_STATUS;
+	private static final String SETTINGS_VIEWSIZE = "viewsize";
+	private static final int SETTINGS_VIEWSIZE_LARGE = PkgListItemAdapter.TEXT_LARGE;
+	private static final int SETTINGS_VIEWSIZE_MEDIUM = PkgListItemAdapter.TEXT_MEDIUM;
+	private static final int SETTINGS_VIEWSIZE_SMALL = PkgListItemAdapter.TEXT_SMALL;
+	private static final int SETTINGS_VIEWSIZE_DEFAULT = SETTINGS_VIEWSIZE_LARGE;
 	
 	PkgListItemAdapter plia;
 	
@@ -101,16 +106,16 @@ public class SDMove extends ListActivity {
 					showDialog(PROGRESS_DIALOG);
 				}
 				@Override
-				public void onPostExecute(Void p) {
-					dismissDialog(PROGRESS_DIALOG);
-			        pt.setState(ProgressThread.STATE_DONE);
-					populateAdapter(pat, getSortPref());
-				}
-				@Override
 				protected Void doInBackground(Void... params) {
 					pat = new ArrayList<PkgListItem>();
 					getPackages(pat);
 					return null;
+				}
+				@Override
+				public void onPostExecute(Void p) {
+					dismissDialog(PROGRESS_DIALOG);
+			        pt.setState(ProgressThread.STATE_DONE);
+					populateAdapter(pat, getSortPref());
 				}
 			}.execute();
 			
@@ -131,9 +136,24 @@ public class SDMove extends ListActivity {
 		}
 	}
 	
+	/*
+	private int getViewPref() {
+		SharedPreferences settings = getPreferences(MODE_PRIVATE);
+		switch (settings.getInt(SETTINGS_VIEWSIZE, SETTINGS_VIEWSIZE_DEFAULT)) {
+		case SETTINGS_VIEWSIZE_SMALL:
+			return android.R.layout.test_list_item;
+			//break;
+		case SETTINGS_VIEWSIZE_LARGE:
+		default:
+			return android.R.layout.simple_list_item_1;
+			//break;
+		}
+	}
+	*/
+	
 	private void populateAdapter(ArrayList<PkgListItem> pap, Comparator<PkgListItem> s) {
 		Collections.sort(pap, s);
-		plia = new PkgListItemAdapter(SDMove.this, android.R.layout.simple_list_item_1, pap);
+		plia = new PkgListItemAdapter(SDMove.this, R.layout.pkglistitemview, getPreferences(MODE_PRIVATE).getInt(SETTINGS_VIEWSIZE, SETTINGS_VIEWSIZE_DEFAULT), pap);
 		plia.sorter = s;
 		setListAdapter(plia);
 		ListView lv = getListView();
@@ -253,6 +273,7 @@ public class SDMove extends ListActivity {
 	
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		int sb = getPreferences(MODE_PRIVATE).getInt(SETTINGS_SORTBY, SETTINGS_SORTBY_DEFAULT);
+		int vs = getPreferences(MODE_PRIVATE).getInt(SETTINGS_VIEWSIZE, SETTINGS_VIEWSIZE_DEFAULT);
 		
 		/* 
 		 * DUMBASSBUG
@@ -274,8 +295,22 @@ public class SDMove extends ListActivity {
 			sb = R.id.sortbystatus;
 			break;
 		}
-		
 		menu.findItem(sb).setChecked(true);
+		
+		switch (vs) {
+		case SETTINGS_VIEWSIZE_SMALL:
+			vs = R.id.viewsmall;
+			break;
+		case SETTINGS_VIEWSIZE_MEDIUM:
+			vs = R.id.viewmedium;
+			break;
+		case SETTINGS_VIEWSIZE_LARGE:
+		default:
+			vs = R.id.viewlarge;
+			break;
+		}
+		menu.findItem(vs).setChecked(true);
+		
 		return true;
 	}
 	
@@ -302,6 +337,24 @@ public class SDMove extends ListActivity {
 			settings.edit().putInt(SETTINGS_SORTBY, SETTINGS_SORTBY_STATUS).commit();
 			return true;
 			// break;
+		case R.id.viewlarge:
+			plia.setTextSize(PkgListItemAdapter.TEXT_LARGE);
+			item.setChecked(true);
+			settings.edit().putInt(SETTINGS_VIEWSIZE, SETTINGS_VIEWSIZE_LARGE).commit();
+			return true;
+			//break;
+		case R.id.viewmedium:
+			plia.setTextSize(PkgListItemAdapter.TEXT_MEDIUM);
+			item.setChecked(true);
+			settings.edit().putInt(SETTINGS_VIEWSIZE, SETTINGS_VIEWSIZE_MEDIUM).commit();
+			return true;
+			//break;
+		case R.id.viewsmall:
+			plia.setTextSize(PkgListItemAdapter.TEXT_SMALL);
+			item.setChecked(true);
+			settings.edit().putInt(SETTINGS_VIEWSIZE, SETTINGS_VIEWSIZE_SMALL).commit();
+			return true;
+			//break;
 		default:
 			return super.onOptionsItemSelected(item);
 			// break;

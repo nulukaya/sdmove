@@ -89,17 +89,48 @@ class PkgListItem {
 class PkgListItemAdapter extends ArrayAdapter<PkgListItem> {
 	Context context;
 	Comparator<PkgListItem> sorter;
+	int size;
 
+	public static final int TEXT_SMALL = 0;
+	public static final int TEXT_MEDIUM = 1;
+	public static final int TEXT_LARGE = 2;
+	public static final int TEXT_DEFAULT = TEXT_LARGE;
+	
 	public PkgListItemAdapter(Context context, int layout, List<PkgListItem> p) {
 		super(context, layout, p);
 		this.context = context;
+		size = TEXT_DEFAULT;
+	}
+
+	public PkgListItemAdapter(Context context, int layout, int s, List<PkgListItem> p) {
+		super(context, layout, p);
+		this.context = context;
+		size = s;
 	}
 	
 	public View getView(int position, View convertView, ViewGroup parent) {
 		TextView view = (TextView)super.getView(position, convertView, parent);
-		PkgListItem p = (PkgListItem) this.getItem(position);
+		PkgListItem p = (PkgListItem)this.getItem(position);
+		switch (size) {
+		case TEXT_SMALL:
+			view.setTextAppearance(context, android.R.style.TextAppearance_Small);
+			break;
+		case TEXT_MEDIUM:
+			view.setTextAppearance(context, android.R.style.TextAppearance_Medium);
+			break;
+		case TEXT_LARGE:
+		default:
+			view.setTextAppearance(context, android.R.style.TextAppearance_Large);
+			break;
+		}
+		view.setMinHeight(Math.round(context.getResources().getDisplayMetrics().density * (view.getTextSize() * 3 - 2)));
 		view.setTextColor(context.getResources().getColor((p.getColor())));
 		return view;
+	}
+	
+	public void setTextSize(int s) {
+		size = s;
+		this.notifyDataSetChanged();
 	}
 	
 	public void sort() {
