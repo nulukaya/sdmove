@@ -6,6 +6,7 @@ import java.util.List;
 
 import android.content.Context;
 import android.content.pm.PackageInfo;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -123,8 +124,11 @@ class PkgListItemAdapter extends ArrayAdapter<PkgListItem> {
 			view.setTextAppearance(context, android.R.style.TextAppearance_Large);
 			break;
 		}
-		view.setMinHeight(Math.round(context.getResources().getDisplayMetrics().density * (view.getTextSize() * 3 - 2)));
+		//view.setMinHeight(Math.round(context.getResources().getDisplayMetrics().density * (view.getTextSize() * 3 - 2)));
+		view.setMinHeight((int)(view.getTextSize() * 3 - 2));
 		view.setTextColor(context.getResources().getColor((p.getColor())));
+		Log.e("SDMove", Integer.toString((int)view.getTextSize()));
+		Log.e("SDMove", Integer.toString((int)view.getHeight()));
 		return view;
 	}
 	
