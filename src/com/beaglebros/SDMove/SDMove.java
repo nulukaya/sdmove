@@ -24,6 +24,7 @@ import android.text.Html;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -67,6 +68,7 @@ public class SDMove extends ListActivity {
 	private static final int SETTINGS_VIEWSIZE_MEDIUM = PkgListItemAdapter.TEXT_MEDIUM;
 	private static final int SETTINGS_VIEWSIZE_SMALL = PkgListItemAdapter.TEXT_SMALL;
 	private static final int SETTINGS_VIEWSIZE_DEFAULT = SETTINGS_VIEWSIZE_LARGE;
+	private static final String IGNOREPREF = "ignore-";
 	
 	PkgListItemAdapter plia;
 	
@@ -158,10 +160,15 @@ public class SDMove extends ListActivity {
 		Collections.sort(pap, s);
 		plia = new PkgListItemAdapter(SDMove.this, R.layout.pkglistitemview, getPreferences(MODE_PRIVATE).getInt(SETTINGS_VIEWSIZE, SETTINGS_VIEWSIZE_DEFAULT), pap);
 		plia.sorter = s;
+		Log.e("SDMove", "test log");
 		SharedPreferences settings = getPreferences(MODE_PRIVATE);
-		for (int i = 0; i < plia.size; i++) {
-			if (settings.contains("ignore-" + plia.getItem(i).name)) {
+		for (int i = 0; i < plia.getCount(); i++) {
+			Log.e("SDMove", Integer.toString(i) + "/" + Integer.toString(plia.getCount()));
+			Log.e("SDMove", plia.getItem(i).name);
+			if (settings.contains(IGNOREPREF + plia.getItem(i).name)) {
+				Log.e("SDMove", "ignoring " + plia.getItem(i).name);
 				plia.remove(plia.getItem(i));
+				i--; // because the remove causes the positions of the following items to shift down
 			}
 		}
 		setListAdapter(plia);
@@ -199,7 +206,7 @@ public class SDMove extends ListActivity {
 	
 	private void addIgnore(String pkg) {
 		SharedPreferences settings = getPreferences(MODE_PRIVATE);
-		settings.edit().putBoolean("ignore-" + pkg, true).commit();
+		settings.edit().putBoolean(IGNOREPREF + pkg, true).commit();
 	}
 	
 	ProgressDialog pd;
