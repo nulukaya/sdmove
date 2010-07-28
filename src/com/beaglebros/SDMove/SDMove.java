@@ -172,6 +172,7 @@ public class SDMove extends ListActivity {
 				}
 			}
 		});
+		registerForContextMenu(lv);
 	}
 	
 	ProgressDialog pd;
