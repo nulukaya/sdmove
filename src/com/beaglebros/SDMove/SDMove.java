@@ -33,6 +33,7 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -185,7 +186,12 @@ public class SDMove extends ListActivity {
 	
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo)item.getMenuInfo();
+		addIgnore(plia.getItem(info.position).name);
 		return true;
+	}
+	
+	private void addIgnore(String pkg) {
 	}
 	
 	ProgressDialog pd;
