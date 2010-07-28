@@ -24,10 +24,12 @@ import android.text.Html;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ForegroundColorSpan;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuInflater;
 import android.view.View;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -173,6 +175,15 @@ public class SDMove extends ListActivity {
 			}
 		});
 		registerForContextMenu(lv);
+	}
+	
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+	}
+	
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		return true;
 	}
 	
 	ProgressDialog pd;
