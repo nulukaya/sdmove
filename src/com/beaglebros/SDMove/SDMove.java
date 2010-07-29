@@ -98,7 +98,7 @@ public class SDMove extends ListActivity {
 			pat = new ArrayList<PkgListItem>();
 			getPackages(pat);
 			try {
-				Thread.sleep(10000);
+				Thread.sleep(5000);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -216,14 +216,15 @@ public class SDMove extends ListActivity {
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo)item.getMenuInfo();
-		addIgnore(plia.getItem(info.position).name);
+		PkgListItem pli = plia.getItem(info.position);
+		addIgnore(pli.name);
+		plia.remove(pli);
 		return true;
 	}
 	
 	private void addIgnore(String pkg) {
 		SharedPreferences settings = getPreferences(MODE_PRIVATE);
 		settings.edit().putBoolean(IGNOREPREF + pkg, true).commit();
-		refreshPackages();
 	}
 	
 	private void clearIgnores() {
@@ -238,7 +239,6 @@ public class SDMove extends ListActivity {
 	}
 	
 	ProgressDialog pd;
-	//ProgressThread pt;
 	
 	protected Dialog onCreateDialog(int id, Bundle args) {
 		switch (id) {
