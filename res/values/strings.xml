@@ -24,8 +24,8 @@
 <string name="ignorepkg">Ignore</string>
 <string name="clearignoremenu">Unignore</string>
 <string name="clearignoremenu_long">Clear Ignored Packages</string>
-<string name="refreshmenu">Refresh Package Listing</string>
-<string name="refreshmenu_long">Refresh</string>
+<string name="refreshmenu">Refresh</string>
+<string name="refreshmenu_long">Refresh Package Listing</string>
 
 <string name="noignoredpackages">All packages already visible</string>
 </resources>
