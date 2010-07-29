@@ -388,7 +388,11 @@ public class SDMove extends ListActivity {
 			//break;
 		case R.id.clearignoremenu:
 			clearIgnores();
-			return(true);
+			return true;
+			//break;
+		case R.id.refreshmenu:
+			refreshPackages();
+			return true;
 			//break;
 		default:
 			return super.onOptionsItemSelected(item);
