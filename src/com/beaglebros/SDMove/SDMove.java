@@ -94,7 +94,7 @@ public class SDMove extends ListActivity {
 	    return data;
 	}
 	
-	private class GetPackagesInBackground extends AsyncTask<Void, Void, ArrayList<PkgListItem>> {
+	private class GetPackagesInBackground extends AsyncTask<Handler, Void, Void> {
 		
 		ArrayList<PkgListItem> pat;
 		
@@ -102,8 +102,12 @@ public class SDMove extends ListActivity {
 		public void onPreExecute() {
 			showDialog(PROGRESS_DIALOG);
 		}
+		
 		@Override
-		protected ArrayList<PkgListItem> doInBackground(Void... params) {
+		protected Void doInBackground(Handler... handlers) {
+			if ( handlers.length != 1 ) {
+				return null;
+			}
 			pat = new ArrayList<PkgListItem>();
 			getPackages(pat);
 			try {
@@ -112,14 +116,27 @@ public class SDMove extends ListActivity {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			return pat;
+			Message m = handlers[0].obtainMessage(0);
+			m.obj = pat;
+			m.sendToTarget();
+			return null;
 		}
+		
 		@Override
-		public void onPostExecute(ArrayList<PkgListItem> p) {
+		public void onPostExecute(Void v) {
 			dismissDialog(PROGRESS_DIALOG);
 	        pt.setState(ProgressThread.STATE_DONE);
 		}
 		
+	}
+	
+	class CreateHandler extends Handler {
+		@Override
+		public void handleMessage(Message msg) {
+			@SuppressWarnings("unchecked")
+			ArrayList<PkgListItem> pl = (ArrayList<PkgListItem>)msg.obj;
+			populateAdapter(pl, getSortPref());
+		}
 	}
 	
 	/** Called when the activity is first created. */
@@ -130,10 +147,11 @@ public class SDMove extends ListActivity {
 		//registerReceiver(new PkgChgReceiver(), new IntentFilter(Intent.ACTION_PACKAGE_CHANGED));
 		
 		@SuppressWarnings("unchecked") // for "data" only
-		ArrayList<PkgListItem> data = (ArrayList<PkgListItem>) getLastNonConfigurationInstance();
+		ArrayList<PkgListItem> data = (ArrayList<PkgListItem>)getLastNonConfigurationInstance();
 		
 		if (data == null) {
-			GetPackagesInBackground gpb = (GetPackagesInBackground)new GetPackagesInBackground().execute();
+			new GetPackagesInBackground().execute(new CreateHandler());
+			/*
 			boolean done = false;
 			while (!done) {
 				try {
@@ -152,6 +170,7 @@ public class SDMove extends ListActivity {
 					done = false;
 				}
 			}
+			*/
 		}
 		populateAdapter(data, getSortPref());
 		
@@ -170,9 +189,24 @@ public class SDMove extends ListActivity {
 		}
 	}
 	
+	class RefreshHandler extends Handler {
+		@Override
+		public void handleMessage(Message msg) {
+			@SuppressWarnings("unchecked")
+			ArrayList<PkgListItem> pl = (ArrayList<PkgListItem>)msg.obj;
+			plia.clear();
+			for (PkgListItem pli: pl) {
+				plia.insert(pli, 0);
+			}
+			removeIgnoredPackages(plia);
+			plia.sort();
+		}
+	}
+	
 	private void refreshPackages() {
-		ArrayList<PkgListItem> pl = null;
-		GetPackagesInBackground gpb = (GetPackagesInBackground)new GetPackagesInBackground().execute();
+		//ArrayList<PkgListItem> pl = null;
+		new GetPackagesInBackground().execute(new RefreshHandler());
+		/*
 		try {
 			pl = gpb.get();
 		} catch (InterruptedException e) {
@@ -188,6 +222,7 @@ public class SDMove extends ListActivity {
 		}
 		removeIgnoredPackages(plia);
 		plia.sort();
+		*/
 	}
 	
 	private void populateAdapter(ArrayList<PkgListItem> pap, Comparator<PkgListItem> s) {
