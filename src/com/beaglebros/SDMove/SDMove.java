@@ -33,6 +33,7 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 import android.content.Intent;
@@ -231,13 +232,19 @@ public class SDMove extends ListActivity {
 	
 	private void clearIgnores() {
 		SharedPreferences settings = getPreferences(MODE_PRIVATE);
+		int count = 0;
 		Set<String> s = settings.getAll().keySet();
 		for (String key: s) {
 			if (key.startsWith(IGNOREPREF)) {
 				settings.edit().remove(key).commit();
+				count++;
 			}
 		}
-		refreshPackages();
+		if (count > 0) {
+			refreshPackages();
+		} else {
+			Toast.makeText(this, R.string.noignoredpackages, Toast.LENGTH_SHORT).show();
+		}
 	}
 	
 	ProgressDialog pd;
