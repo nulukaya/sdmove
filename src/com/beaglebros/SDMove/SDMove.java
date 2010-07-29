@@ -157,14 +157,32 @@ public class SDMove extends ListActivity {
 	*/
 	
 	private void refreshPackages() {
-		ArrayList<PkgListItem> pl = new ArrayList<PkgListItem>();
-		getPackages(pl);
-		plia.clear();
-		for (PkgListItem p: pl) {
-			plia.insert(p, 0);
-		}
-		removeIgnoredPackages(plia);
-		plia.sort();
+		//ArrayList<PkgListItem> pl = new ArrayList<PkgListItem>();
+		//getPackages(pl);
+		new AsyncTask<Void,Void,Void>() {
+			ArrayList<PkgListItem> pat;
+			@Override
+			public void onPreExecute() {
+				showDialog(PROGRESS_DIALOG);
+			}
+			@Override
+			protected Void doInBackground(Void... params) {
+				pat = new ArrayList<PkgListItem>();
+				getPackages(pat);
+				return null;
+			}
+			@Override
+			public void onPostExecute(Void p) {
+				dismissDialog(PROGRESS_DIALOG);
+		        pt.setState(ProgressThread.STATE_DONE);
+				plia.clear();
+				for (PkgListItem pli: pat) {
+					plia.insert(pli, 0);
+				}
+				removeIgnoredPackages(plia);
+				plia.sort();
+			}
+		}.execute();
 	}
 	
 	private void populateAdapter(ArrayList<PkgListItem> pap, Comparator<PkgListItem> s) {
