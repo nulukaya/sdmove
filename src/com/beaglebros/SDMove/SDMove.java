@@ -351,7 +351,7 @@ public class SDMove extends ListActivity {
 		SharedPreferences settings = getPreferences(MODE_PRIVATE);
 		switch (item.getItemId()) {
 		case R.id.aboutmenu:
-			showDialog(0);
+			showDialog(ABOUT_DIALOG);
 			return true;
 			// break;
 		case R.id.sortbyname:
