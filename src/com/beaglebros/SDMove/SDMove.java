@@ -72,15 +72,6 @@ public class SDMove extends ListActivity {
 	
 	PkgListItemAdapter plia;
 	
-	/*
-	class PkgChgReceiver extends BroadcastReceiver {
-		@Override
-		public void onReceive(Context c, Intent i) {
-			Toast.makeText(SDMove.this, "testing broadcast receive", Toast.LENGTH_LONG).show();
-		}
-	}
-	*/
-	
 	@Override
 	public Object onRetainNonConfigurationInstance() {
 	    final ArrayList<PkgListItem> data = new ArrayList<PkgListItem>();
@@ -97,7 +88,6 @@ public class SDMove extends ListActivity {
 		@Override
 		public void onPreExecute() {
 			showDialog(PROGRESS_DIALOG);
-	        //pt.setState(ProgressThread.STATE_RUNNING);
 		}
 		
 		@Override
@@ -122,8 +112,6 @@ public class SDMove extends ListActivity {
 		@Override
 		public void onPostExecute(Void v) {
 			removeDialog(PROGRESS_DIALOG);
-			//dismissDialog(PROGRESS_DIALOG);
-	        //pt.setState(ProgressThread.STATE_DONE);
 		}
 		
 	}
@@ -131,7 +119,7 @@ public class SDMove extends ListActivity {
 	class CreateHandler extends Handler {
 		@Override
 		public void handleMessage(Message msg) {
-			@SuppressWarnings("unchecked")
+			@SuppressWarnings("unchecked") // for "pl" only
 			ArrayList<PkgListItem> pl = (ArrayList<PkgListItem>)msg.obj;
 			populateAdapter(pl, getSortPref());
 		}
@@ -141,8 +129,6 @@ public class SDMove extends ListActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
-		//registerReceiver(new PkgChgReceiver(), new IntentFilter(Intent.ACTION_PACKAGE_CHANGED));
 		
 		@SuppressWarnings("unchecked") // for "data" only
 		ArrayList<PkgListItem> data = (ArrayList<PkgListItem>)getLastNonConfigurationInstance();
@@ -171,7 +157,7 @@ public class SDMove extends ListActivity {
 	class RefreshHandler extends Handler {
 		@Override
 		public void handleMessage(Message msg) {
-			@SuppressWarnings("unchecked")
+			@SuppressWarnings("unchecked") // for "pl" only
 			ArrayList<PkgListItem> pl = (ArrayList<PkgListItem>)msg.obj;
 			plia.clear();
 			for (PkgListItem pli: pl) {
@@ -306,50 +292,6 @@ public class SDMove extends ListActivity {
 			return null;
 		}		
 	}
-	
-	/*
-	protected void onPrepareDialog(int id, Dialog d, Bundle args) {
-		switch (id) {
-		case PROGRESS_DIALOG:
-			pt = new ProgressThread(handler);
-			pt.start();
-		case ABOUT_DIALOG:
-		default:
-		}
-	}
-	
-    final Handler handler = new Handler() {
-        public void handleMessage(Message msg) {
-        }
-    };
-
-	private class ProgressThread extends Thread {
-	    @SuppressWarnings("unused")
-		Handler mHandler;
-	    final static int STATE_DONE = 0;
-	    final static int STATE_RUNNING = 1;
-	    int mState;
-	
-	    ProgressThread(Handler h) {
-	        mHandler = h;
-	    }
-	
-	    public void run() {
-	        mState = STATE_RUNNING;   
-	        while (mState == STATE_RUNNING) {
-	            try {
-	                Thread.sleep(100);
-	            } catch (InterruptedException e) {
-	                //Log.e("ERROR", "Thread Interrupted");
-	            }
-	        }
-	    }
-	    
-	    public void setState(int state) {
-	        mState = state;
-	    }
-	}
-	*/
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
