@@ -24,6 +24,7 @@ import android.text.Html;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -49,6 +50,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -103,6 +106,12 @@ public class SDMove extends ListActivity {
 		protected ArrayList<PkgListItem> doInBackground(Void... params) {
 			pat = new ArrayList<PkgListItem>();
 			getPackages(pat);
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			return pat;
 		}
 		@Override
@@ -125,14 +134,23 @@ public class SDMove extends ListActivity {
 		
 		if (data == null) {
 			GetPackagesInBackground gpb = (GetPackagesInBackground)new GetPackagesInBackground().execute();
-			try {
-				data = gpb.get();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				//e.printStackTrace();
-			} catch (ExecutionException e) {
-				// TODO Auto-generated catch block
-				//e.printStackTrace();
+			boolean done = false;
+			while (!done) {
+				try {
+					Log.e("SDMove", "get");
+					data = gpb.get(50, TimeUnit.MILLISECONDS);
+					done = true;
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					//e.printStackTrace();
+				} catch (ExecutionException e) {
+					// TODO Auto-generated catch block
+					//e.printStackTrace();
+				} catch (TimeoutException e) {
+					// TODO Auto-generated catch block
+					//e.printStackTrace();
+					done = false;
+				}
 			}
 		}
 		populateAdapter(data, getSortPref());
