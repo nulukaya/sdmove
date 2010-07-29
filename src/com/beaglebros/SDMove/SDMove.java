@@ -48,6 +48,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -90,6 +91,28 @@ public class SDMove extends ListActivity {
 	    return data;
 	}
 	
+	private class GetPackagesInBackground extends AsyncTask<Void, Void, ArrayList<PkgListItem>> {
+		
+		ArrayList<PkgListItem> pat;
+		
+		@Override
+		public void onPreExecute() {
+			showDialog(PROGRESS_DIALOG);
+		}
+		@Override
+		protected ArrayList<PkgListItem> doInBackground(Void... params) {
+			pat = new ArrayList<PkgListItem>();
+			getPackages(pat);
+			return pat;
+		}
+		@Override
+		public void onPostExecute(ArrayList<PkgListItem> p) {
+			dismissDialog(PROGRESS_DIALOG);
+	        pt.setState(ProgressThread.STATE_DONE);
+		}
+		
+	}
+	
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -100,31 +123,19 @@ public class SDMove extends ListActivity {
 		@SuppressWarnings("unchecked") // for "data" only
 		ArrayList<PkgListItem> data = (ArrayList<PkgListItem>) getLastNonConfigurationInstance();
 		
-		if (data != null) {
-			populateAdapter(data, getSortPref());
-		} else {
-		
-			new AsyncTask<Void,Void,Void>() {
-				ArrayList<PkgListItem> pat;
-				@Override
-				public void onPreExecute() {
-					showDialog(PROGRESS_DIALOG);
-				}
-				@Override
-				protected Void doInBackground(Void... params) {
-					pat = new ArrayList<PkgListItem>();
-					getPackages(pat);
-					return null;
-				}
-				@Override
-				public void onPostExecute(Void p) {
-					dismissDialog(PROGRESS_DIALOG);
-			        pt.setState(ProgressThread.STATE_DONE);
-					populateAdapter(pat, getSortPref());
-				}
-			}.execute();
-			
+		if (data == null) {
+			GetPackagesInBackground gpb = (GetPackagesInBackground)new GetPackagesInBackground().execute();
+			try {
+				data = gpb.get();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				//e.printStackTrace();
+			} catch (ExecutionException e) {
+				// TODO Auto-generated catch block
+				//e.printStackTrace();
+			}
 		}
+		populateAdapter(data, getSortPref());
 		
 	}
 
@@ -141,48 +152,24 @@ public class SDMove extends ListActivity {
 		}
 	}
 	
-	/*
-	private int getViewPref() {
-		SharedPreferences settings = getPreferences(MODE_PRIVATE);
-		switch (settings.getInt(SETTINGS_VIEWSIZE, SETTINGS_VIEWSIZE_DEFAULT)) {
-		case SETTINGS_VIEWSIZE_SMALL:
-			return android.R.layout.test_list_item;
-			//break;
-		case SETTINGS_VIEWSIZE_LARGE:
-		default:
-			return android.R.layout.simple_list_item_1;
-			//break;
-		}
-	}
-	*/
-	
 	private void refreshPackages() {
-		//ArrayList<PkgListItem> pl = new ArrayList<PkgListItem>();
-		//getPackages(pl);
-		new AsyncTask<Void,Void,Void>() {
-			ArrayList<PkgListItem> pat;
-			@Override
-			public void onPreExecute() {
-				showDialog(PROGRESS_DIALOG);
-			}
-			@Override
-			protected Void doInBackground(Void... params) {
-				pat = new ArrayList<PkgListItem>();
-				getPackages(pat);
-				return null;
-			}
-			@Override
-			public void onPostExecute(Void p) {
-				dismissDialog(PROGRESS_DIALOG);
-		        pt.setState(ProgressThread.STATE_DONE);
-				plia.clear();
-				for (PkgListItem pli: pat) {
-					plia.insert(pli, 0);
-				}
-				removeIgnoredPackages(plia);
-				plia.sort();
-			}
-		}.execute();
+		ArrayList<PkgListItem> pl = null;
+		GetPackagesInBackground gpb = (GetPackagesInBackground)new GetPackagesInBackground().execute();
+		try {
+			pl = gpb.get();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			//e.printStackTrace();
+		} catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+			//e.printStackTrace();
+		}
+		plia.clear();
+		for (PkgListItem pli: pl) {
+			plia.insert(pli, 0);
+		}
+		removeIgnoredPackages(plia);
+		plia.sort();
 	}
 	
 	private void populateAdapter(ArrayList<PkgListItem> pap, Comparator<PkgListItem> s) {
