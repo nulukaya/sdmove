@@ -24,7 +24,6 @@ import android.text.Html;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ForegroundColorSpan;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -49,9 +48,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -151,28 +147,9 @@ public class SDMove extends ListActivity {
 		
 		if (data == null) {
 			new GetPackagesInBackground().execute(new CreateHandler());
-			/*
-			boolean done = false;
-			while (!done) {
-				try {
-					Log.e("SDMove", "get");
-					data = gpb.get(50, TimeUnit.MILLISECONDS);
-					done = true;
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					//e.printStackTrace();
-				} catch (ExecutionException e) {
-					// TODO Auto-generated catch block
-					//e.printStackTrace();
-				} catch (TimeoutException e) {
-					// TODO Auto-generated catch block
-					//e.printStackTrace();
-					done = false;
-				}
-			}
-			*/
+		} else {
+			populateAdapter(data, getSortPref());
 		}
-		populateAdapter(data, getSortPref());
 		
 	}
 
@@ -204,25 +181,7 @@ public class SDMove extends ListActivity {
 	}
 	
 	private void refreshPackages() {
-		//ArrayList<PkgListItem> pl = null;
 		new GetPackagesInBackground().execute(new RefreshHandler());
-		/*
-		try {
-			pl = gpb.get();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			//e.printStackTrace();
-		} catch (ExecutionException e) {
-			// TODO Auto-generated catch block
-			//e.printStackTrace();
-		}
-		plia.clear();
-		for (PkgListItem pli: pl) {
-			plia.insert(pli, 0);
-		}
-		removeIgnoredPackages(plia);
-		plia.sort();
-		*/
 	}
 	
 	private void populateAdapter(ArrayList<PkgListItem> pap, Comparator<PkgListItem> s) {
