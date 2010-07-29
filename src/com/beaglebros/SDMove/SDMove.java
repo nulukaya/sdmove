@@ -97,12 +97,14 @@ public class SDMove extends ListActivity {
 			}
 			pat = new ArrayList<PkgListItem>();
 			getPackages(pat);
+			/*
 			try {
 				Thread.sleep(5000);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			*/
 			Message m = handlers[0].obtainMessage(0);
 			m.obj = pat;
 			m.sendToTarget();
