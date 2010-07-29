@@ -156,17 +156,22 @@ public class SDMove extends ListActivity {
 	}
 	*/
 	
+	private void refreshPackages() {
+		ArrayList<PkgListItem> pl = new ArrayList<PkgListItem>();
+		getPackages(pl);
+		plia.clear();
+		for (PkgListItem p: pl) {
+			plia.insert(p, 0);
+		}
+		removeIgnoredPackages(plia);
+		plia.sort();
+	}
+	
 	private void populateAdapter(ArrayList<PkgListItem> pap, Comparator<PkgListItem> s) {
 		Collections.sort(pap, s);
 		plia = new PkgListItemAdapter(SDMove.this, R.layout.pkglistitemview, getPreferences(MODE_PRIVATE).getInt(SETTINGS_VIEWSIZE, SETTINGS_VIEWSIZE_DEFAULT), pap);
 		plia.sorter = s;
-		SharedPreferences settings = getPreferences(MODE_PRIVATE);
-		for (int i = 0; i < plia.getCount(); i++) {
-			if (settings.contains(IGNOREPREF + plia.getItem(i).name)) {
-				plia.remove(plia.getItem(i));
-				i--; // because the remove causes the positions of the following items to shift down
-			}
-		}
+		removeIgnoredPackages(plia);
 		setListAdapter(plia);
 		ListView lv = getListView();
 		lv.setOnItemClickListener(new OnItemClickListener() {
@@ -186,6 +191,16 @@ public class SDMove extends ListActivity {
 		});
 		registerForContextMenu(lv);
 	}
+
+	private void removeIgnoredPackages(PkgListItemAdapter plia) {
+		SharedPreferences settings = getPreferences(MODE_PRIVATE);
+		for (int i = 0; i < plia.getCount(); i++) {
+			if (settings.contains(IGNOREPREF + plia.getItem(i).name)) {
+				plia.remove(plia.getItem(i));
+				i--; // because the remove causes the positions of the following items to shift down
+			}
+		}
+	}
 	
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
@@ -203,6 +218,7 @@ public class SDMove extends ListActivity {
 	private void addIgnore(String pkg) {
 		SharedPreferences settings = getPreferences(MODE_PRIVATE);
 		settings.edit().putBoolean(IGNOREPREF + pkg, true).commit();
+		refreshPackages();
 	}
 	
 	private void clearIgnores() {
@@ -213,6 +229,7 @@ public class SDMove extends ListActivity {
 				settings.edit().remove(key).commit();
 			}
 		}
+		refreshPackages();
 	}
 	
 	ProgressDialog pd;
