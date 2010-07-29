@@ -97,6 +97,7 @@ public class SDMove extends ListActivity {
 		@Override
 		public void onPreExecute() {
 			showDialog(PROGRESS_DIALOG);
+	        //pt.setState(ProgressThread.STATE_RUNNING);
 		}
 		
 		@Override
@@ -120,8 +121,9 @@ public class SDMove extends ListActivity {
 		
 		@Override
 		public void onPostExecute(Void v) {
-			dismissDialog(PROGRESS_DIALOG);
-	        pt.setState(ProgressThread.STATE_DONE);
+			removeDialog(PROGRESS_DIALOG);
+			//dismissDialog(PROGRESS_DIALOG);
+	        //pt.setState(ProgressThread.STATE_DONE);
 		}
 		
 	}
@@ -250,7 +252,7 @@ public class SDMove extends ListActivity {
 	}
 	
 	ProgressDialog pd;
-	ProgressThread pt;
+	//ProgressThread pt;
 	
 	protected Dialog onCreateDialog(int id, Bundle args) {
 		switch (id) {
@@ -298,13 +300,22 @@ public class SDMove extends ListActivity {
 			pd.setTitle("Please wait");
 			pd.setMessage("Loading packages");
 			pd.setCancelable(true);
-			pt = new ProgressThread(handler);
-			pt.start();
 			return pd;
 			//break;
 		default:
 			return null;
 		}		
+	}
+	
+	/*
+	protected void onPrepareDialog(int id, Dialog d, Bundle args) {
+		switch (id) {
+		case PROGRESS_DIALOG:
+			pt = new ProgressThread(handler);
+			pt.start();
+		case ABOUT_DIALOG:
+		default:
+		}
 	}
 	
     final Handler handler = new Handler() {
@@ -338,6 +349,7 @@ public class SDMove extends ListActivity {
 	        mState = state;
 	    }
 	}
+	*/
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
