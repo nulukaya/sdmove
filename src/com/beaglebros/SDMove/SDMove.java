@@ -13,6 +13,7 @@ package com.beaglebros.SDMove;
 // Thanks to Leeds for pointing out my stupid mistake in interpreting a stack trace
 // and to everyone in general on #android-dev for putting up with me
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
@@ -32,10 +33,13 @@ import android.view.View;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.*;
@@ -249,36 +253,34 @@ public class SDMove extends ListActivity {
 	
 	ProgressDialog pd;
 	
-	protected Dialog onCreateDialog(int id, Bundle args) {
-		switch (id) {
-		case ABOUT_DIALOG:
+	public static class AboutDialogBuilder {
+		public static AlertDialog create(Context context) throws NameNotFoundException {
+			final RelativeLayout d = (RelativeLayout)View.inflate(context, R.layout.aboutdialog, null);
+			RelativeLayout body = (RelativeLayout)d.findViewById(R.id.dialogbodyscroll).findViewById(R.id.dialogbody);
 			TextView tv;
 			SpannableString io;
 			
-			Resources r = getResources();
-			Dialog d = new Dialog(this);
+			Resources r = context.getResources();
 			
-			d.setContentView(R.layout.aboutdialog);
-			d.setTitle(r.getString(R.string.abouttitle));
 			io = new SpannableString(r.getString(R.string.intonly) + " " + r.getString(R.string.intonlydesc));
 			io.setSpan(new ForegroundColorSpan(r.getColor(R.color.intonly)), 0, r.getString(R.string.intonly).length(), 0);
-			tv = (TextView)d.findViewById(R.id.intonlydesc);
+			tv = (TextView)body.findViewById(R.id.intonlydesc);
 			tv.setText(io);
 			io = new SpannableString(r.getString(R.string.autoext) + " " + r.getString(R.string.autoextdesc));
 			io.setSpan(new ForegroundColorSpan(r.getColor(R.color.autoext)), 0, r.getString(R.string.autoext).length(), 0);
-			tv = (TextView)d.findViewById(R.id.autoextdesc);
+			tv = (TextView)body.findViewById(R.id.autoextdesc);
 			tv.setText(io);
 			io = new SpannableString(r.getString(R.string.autoint) + " " + r.getString(R.string.autointdesc));
 			io.setSpan(new ForegroundColorSpan(r.getColor(R.color.autoint)), 0, r.getString(R.string.autoint).length(), 0);
-			tv = (TextView)d.findViewById(R.id.autointdesc);
+			tv = (TextView)body.findViewById(R.id.autointdesc);
 			tv.setText(io);
 			io = new SpannableString(r.getString(R.string.prefext) + " " + r.getString(R.string.prefextdesc));
 			io.setSpan(new ForegroundColorSpan(r.getColor(R.color.prefext)), 0, r.getString(R.string.prefext).length(), 0);
-			tv = (TextView)d.findViewById(R.id.prefextdesc);
+			tv = (TextView)body.findViewById(R.id.prefextdesc);
 			tv.setText(io);
 			io = new SpannableString(r.getString(R.string.prefint) + " " + r.getString(R.string.prefintdesc));
 			io.setSpan(new ForegroundColorSpan(r.getColor(R.color.prefint)), 0, r.getString(R.string.prefint).length(), 0);
-			tv = (TextView)d.findViewById(R.id.prefintdesc);
+			tv = (TextView)body.findViewById(R.id.prefintdesc);
 			tv.setText(io);
 			String tmp = "";
 			for (String s: r.getStringArray(R.array.thanks)) {
@@ -287,6 +289,22 @@ public class SDMove extends ListActivity {
 			tv = (TextView)d.findViewById(R.id.thanks);
 			tv.setMovementMethod(LinkMovementMethod.getInstance());
 			tv.setText(Html.fromHtml(tmp));
+
+			return new AlertDialog.Builder(context).setTitle(R.string.abouttitle).setCancelable(true).setIcon(android.R.drawable.ic_dialog_info).setPositiveButton(
+				 context.getString(android.R.string.ok), null).setView(d).create();
+		}
+	}
+	
+	protected Dialog onCreateDialog(int id, Bundle args) {
+		switch (id) {
+		case ABOUT_DIALOG:
+			AlertDialog d = null;
+			try {
+				d = AboutDialogBuilder.create(this);
+			} catch (NameNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			return d;
 			//break;
 		case PROGRESS_DIALOG:
