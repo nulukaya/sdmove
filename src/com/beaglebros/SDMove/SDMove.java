@@ -385,6 +385,7 @@ public class SDMove extends ListActivity {
 			PackageInfo pi;
 			pi = getPackageManager().getPackageInfo(p.pkg.packageName, 0);
 			plia.add(new PkgListItem(this, pi));
+			plia.remove(p);
 			plia.sort();
 		} catch (NameNotFoundException e1) {
 			Toast.makeText(this, "I guess you removed it?", Toast.LENGTH_SHORT).show();
