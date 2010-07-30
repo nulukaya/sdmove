@@ -75,7 +75,6 @@ public class SDMove extends ListActivity {
 	private static final String IGNOREPREF = "ignore-";
 	
 	PkgListItemAdapter plia;
-	ProgressDialog pd;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -124,7 +123,7 @@ public class SDMove extends ListActivity {
 			return d;
 			//break;
 		case PROGRESS_DIALOG:
-			pd = new ProgressDialog(SDMove.this);
+			ProgressDialog pd = new ProgressDialog(SDMove.this);
 			pd.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 			pd.setTitle("Please wait");
 			pd.setMessage("Loading packages");
