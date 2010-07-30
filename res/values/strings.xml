@@ -22,10 +22,11 @@
 
 
 <string name="contextignore">Ignore</string>
-<string name="clearignoremenu">Unignore</string>
+<string name="contextlaunch">Launch</string><string name="clearignoremenu">Unignore</string>
 <string name="clearignoremenu_long">Clear Ignored Packages</string>
 <string name="refreshmenu">Refresh</string>
 <string name="refreshmenu_long">Refresh Package Listing</string>
 
 <string name="noignoredpackages">All packages already visible</string>
+
 </resources>
