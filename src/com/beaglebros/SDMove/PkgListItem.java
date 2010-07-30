@@ -26,6 +26,7 @@ class PkgListItem {
 	public String name;
 	public int stored;
 	public int storepref;
+	public boolean hidden = false;
 	
 	// Experimentally determined
 	public static final int PKG_STOREPREF_AUTO = 0; // auto
@@ -169,8 +170,11 @@ class PkgListItemAdapter extends ArrayAdapter<PkgListItem> {
 	}
 	
 	public View getView(int position, View convertView, ViewGroup parent) {
-		TextView view = (TextView)super.getView(position, convertView, parent);
 		PkgListItem p = (PkgListItem)this.getItem(position);
+		if (p.hidden) {
+			return new View(context);
+		}
+		TextView view = (TextView)super.getView(position, convertView, parent);
 		switch (size) {
 		case TEXT_SMALL:
 			view.setTextAppearance(context, android.R.style.TextAppearance_Small);
@@ -189,6 +193,19 @@ class PkgListItemAdapter extends ArrayAdapter<PkgListItem> {
 		return view;
 	}
 	
+	public int getItemViewType(int position) {
+		PkgListItem p = (PkgListItem)this.getItem(position);
+		if (p.hidden) {
+			return 1;
+		} else {
+			return 0;
+		}
+	}
+	
+	public int getViewTypeCount() {
+		return 2;
+	}
+	
 	public void setTextSize(int s) {
 		size = s;
 		this.notifyDataSetChanged();
@@ -197,6 +214,15 @@ class PkgListItemAdapter extends ArrayAdapter<PkgListItem> {
 	public void sort() {
 		super.sort(sorter);
 		this.notifyDataSetChanged();
+	}
+	
+	public PkgListItem getItem(String name) {
+		for (int i=0; i < this.getCount(); i++) {
+			if (this.getItem(i).pkg.packageName.contentEquals(name)) {
+				return this.getItem(i);
+			}
+		}
+		return null;
 	}
 
 }

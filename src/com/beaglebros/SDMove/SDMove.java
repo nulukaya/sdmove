@@ -50,6 +50,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class SDMove extends ListActivity {
@@ -302,8 +304,9 @@ public class SDMove extends ListActivity {
 	public boolean onContextItemSelected(MenuItem item) {
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo)item.getMenuInfo();
 		PkgListItem pli = plia.getItem(info.position);
-		addIgnore(pli.name);
-		plia.remove(pli);
+		addIgnore(pli);
+		//plia.remove(pli);
+		updateIgnoredPackages(plia);
 		return true;
 	}
 
@@ -368,10 +371,10 @@ public class SDMove extends ListActivity {
 			plia.sort();
 		} catch (NameNotFoundException e1) {
 			Toast.makeText(this, "I guess you removed it?", Toast.LENGTH_SHORT).show();
+			plia.remove(p);
 		} catch (IllegalArgumentException e) {
 			// That's okay
 		}
-		plia.remove(p);
 	}
 
 	private void refreshPackage() {
@@ -387,7 +390,7 @@ public class SDMove extends ListActivity {
 			for (PkgListItem pli: pl) {
 				plia.insert(pli, 0);
 			}
-			removeIgnoredPackages(plia);
+			updateIgnoredPackages(plia);
 			plia.sort();
 		}
 	}
@@ -396,7 +399,7 @@ public class SDMove extends ListActivity {
 		Collections.sort(pap, s);
 		plia = new PkgListItemAdapter(SDMove.this, R.layout.pkglistitemview, getPreferences(MODE_PRIVATE).getInt(SETTINGS_VIEWSIZE, SETTINGS_VIEWSIZE_DEFAULT), pap);
 		plia.sorter = s;
-		removeIgnoredPackages(plia);
+		updateIgnoredPackages(plia);
 		setListAdapter(plia);
 		ListView lv = getListView();
 		lv.setOnItemClickListener(new OnItemClickListener() {
@@ -419,33 +422,43 @@ public class SDMove extends ListActivity {
 		registerForContextMenu(lv);
 	}
 
-	private void addIgnore(String pkg) {
+	private void addIgnore(PkgListItem pkg) {
 		SharedPreferences settings = getPreferences(MODE_PRIVATE);
-		settings.edit().putBoolean(IGNOREPREF + pkg, true).commit();
+		settings.edit().putBoolean(IGNOREPREF + pkg.pkg.packageName, true).commit();
+		pkg.hidden = true;
 	}
 
-	private void removeIgnoredPackages(PkgListItemAdapter plia) {
+	private void updateIgnoredPackages(PkgListItemAdapter plia) {
 		SharedPreferences settings = getPreferences(MODE_PRIVATE);
 		for (int i = 0; i < plia.getCount(); i++) {
-			if (settings.contains(IGNOREPREF + plia.getItem(i).name)) {
-				plia.remove(plia.getItem(i));
-				i--; // because the remove causes the positions of the following items to shift down
+			PkgListItem pli = plia.getItem(i);
+			if (settings.contains(IGNOREPREF + pli.pkg.packageName)) {
+				addIgnore(pli);
 			}
 		}
+		plia.notifyDataSetChanged();
 	}
 	
 	private void clearIgnores() {
 		SharedPreferences settings = getPreferences(MODE_PRIVATE);
 		int count = 0;
 		Set<String> s = settings.getAll().keySet();
+		Pattern regex = Pattern.compile("^" + IGNOREPREF + "(.*)$");
 		for (String key: s) {
-			if (key.startsWith(IGNOREPREF)) {
+			Matcher m = regex.matcher(key);
+			if (m.matches()) {
+				Log.e("SDMove", m.group(1));
+				PkgListItem pli = plia.getItem(m.group(1));
+				if (pli != null) {
+					plia.getItem(m.group(1)).hidden=false;
+				}
 				settings.edit().remove(key).commit();
 				count++;
 			}
 		}
 		if (count > 0) {
-			refreshPackage();
+			//refreshPackage();
+			updateIgnoredPackages(plia);
 		} else {
 			Toast.makeText(this, R.string.noignoredpackages, Toast.LENGTH_SHORT).show();
 		}
