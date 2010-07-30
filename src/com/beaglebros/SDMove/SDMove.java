@@ -39,6 +39,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -322,6 +323,8 @@ public class SDMove extends ListActivity {
 	}
 	
 	private void launchApp(PkgListItem pli) {
+        Intent i = getPackageManager().getLaunchIntentForPackage(pli.pkg.packageName);
+        startActivity(i);
 	}
 
 	private class GetPackagesInBackground extends AsyncTask<Handler, Void, Void> {
