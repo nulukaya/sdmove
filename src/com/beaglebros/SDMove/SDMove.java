@@ -304,10 +304,24 @@ public class SDMove extends ListActivity {
 	public boolean onContextItemSelected(MenuItem item) {
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo)item.getMenuInfo();
 		PkgListItem pli = plia.getItem(info.position);
-		addIgnore(pli);
-		//plia.remove(pli);
-		updateIgnoredPackages(plia);
-		return true;
+		
+		switch (item.getItemId()) {
+		case R.id.contextignore:
+			addIgnore(pli);
+			//plia.remove(pli);
+			updateIgnoredPackages(plia);
+			return true;
+			//break;
+		case R.id.contextlaunch:
+			launchApp(pli);
+			return true;
+			//break;
+		default:
+			return false;
+		}
+	}
+	
+	private void launchApp(PkgListItem pli) {
 	}
 
 	private class GetPackagesInBackground extends AsyncTask<Handler, Void, Void> {
