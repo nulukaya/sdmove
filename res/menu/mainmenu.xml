@@ -1,6 +1,4 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-	<item android:id="@+id/aboutmenu" android:icon="@android:drawable/ic_menu_info_details" android:title="@string/aboutmenu">
-	</item>
 	<item android:id="@+id/sortmenu" android:icon="@android:drawable/ic_menu_sort_by_size" android:title="@string/sortmenu">
 		<menu>
 			<group android:checkableBehavior="single" android:id="@+id/sortmenugroup">
@@ -10,8 +8,7 @@
 				</item>
 			</group>
 		</menu>
-	</item>
-	<item android:id="@+id/viewmenu" android:title="@string/viewmenu" android:icon="@android:drawable/ic_menu_view">
+	</item><item android:id="@+id/viewmenu" android:title="@string/viewmenu" android:icon="@android:drawable/ic_menu_view">
 		<menu>
 			<group android:id="@+id/viewmenugroup" android:checkableBehavior="single">
 				<item android:id="@+id/viewlarge" android:title="@string/viewlarge" android:checked="true">
@@ -23,6 +20,10 @@
 			</group>
 		</menu>
 	</item>
-<item android:id="@+id/clearignoremenu" android:icon="@android:drawable/ic_menu_revert" android:title="@string/clearignoremenu_long" android:titleCondensed="@string/clearignoremenu"></item>
-<item android:id="@+id/refreshmenu" android:icon="@android:drawable/ic_menu_rotate" android:title="@string/refreshmenu_long" android:titleCondensed="@string/refreshmenu"></item>
+	<item android:id="@+id/refreshmenu" android:icon="@android:drawable/ic_menu_rotate" android:title="@string/refreshmenu_long" android:titleCondensed="@string/refreshmenu">
+	</item>
+	<item android:id="@+id/clearignoremenu" android:icon="@android:drawable/ic_menu_revert" android:title="@string/clearignoremenu_long" android:titleCondensed="@string/clearignoremenu">
+	</item>
+	<item android:id="@+id/aboutmenu" android:icon="@android:drawable/ic_menu_info_details" android:title="@string/aboutmenu">
+	</item>
 </menu>
