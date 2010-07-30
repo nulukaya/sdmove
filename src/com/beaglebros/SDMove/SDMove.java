@@ -25,6 +25,7 @@ import android.text.Html;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -43,18 +44,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.*;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.res.AssetManager;
 import android.content.res.Resources;
-import android.content.res.XmlResourceParser;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 
 
 public class SDMove extends ListActivity {
@@ -74,7 +69,8 @@ public class SDMove extends ListActivity {
 	private static final int SETTINGS_VIEWSIZE_DEFAULT = SETTINGS_VIEWSIZE_LARGE;
 	private static final String IGNOREPREF = "ignore-";
 	
-	PkgListItemAdapter plia;
+	private PkgListItemAdapter plia;
+	private PkgListItem controlledPkg = null;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -99,6 +95,20 @@ public class SDMove extends ListActivity {
 			ArrayList<PkgListItem> pl = (ArrayList<PkgListItem>)msg.obj;
 			populateAdapter(pl, getSortPref());
 		}
+	}
+	
+	@Override
+	public void onStop() {
+		Log.e("SDMove", "onStop");
+		super.onStop();
+	}
+
+	@Override
+	public void onRestart() {
+		Log.e("SDMove", "onRestart");
+		refreshPackage(controlledPkg);
+		controlledPkg = null;
+		super.onRestart();
 	}
 
 	@Override
@@ -273,7 +283,7 @@ public class SDMove extends ListActivity {
 			return true;
 			//break;
 		case R.id.refreshmenu:
-			refreshPackages();
+			refreshPackage();
 			return true;
 			//break;
 		default:
@@ -338,56 +348,33 @@ public class SDMove extends ListActivity {
 		PackageManager pm = getPackageManager();
 		
 		for (PackageInfo pkg: pm.getInstalledPackages(0)) {
-			String packageName;
-			packageName = pkg.packageName;
-			if ( packageName == null || packageName == "" ) {
-				packageName = "android";
-			}
-			
 			try {
-				AssetManager am = createPackageContext(packageName, 0).getAssets();
-				XmlResourceParser xml = am.openXmlResourceParser("AndroidManifest.xml");
-				try {
-					int eventType = xml.getEventType();
-					xmlloop:
-					while (eventType != XmlPullParser.END_DOCUMENT) {
-						switch (eventType) {
-							case XmlPullParser.START_TAG:
-								if (! xml.getName().matches("manifest")) {
-									break xmlloop;
-								} else {
-									attrloop:
-									for (int j = 0; j < xml.getAttributeCount(); j++) {
-										if (xml.getAttributeName(j).matches("installLocation")) {
-											p.add(new PkgListItem(
-													pkg,
-													pkg.applicationInfo.loadLabel(pm).toString(),
-													((pkg.applicationInfo.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) == 0)?PkgListItem.PKG_STORED_INTERNAL:PkgListItem.PKG_STORED_EXTERNAL,
-													Integer.parseInt(xml.getAttributeValue(j))));
-											break attrloop;
-										}
-									}
-								}
-								break;
-						}
-						eventType = xml.nextToken();
-					}
-				} catch (IOException ioe) {
-					// TODO showError("Reading XML", ioe);
-				} catch (XmlPullParserException xppe) {
-					// TODO showError("Parsing XML", xppe);
-				}
-	
-			} catch (NameNotFoundException e) {
-				// TODO Auto-generated catch block
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				p.add(new PkgListItem(this, pkg));
+			} catch (IllegalArgumentException e) {
+				// That's okay
 			}
-	
 		}
 	}
 
-	private void refreshPackages() {
+	private void refreshPackage(PkgListItem p) {
+		if (p == null) {
+			refreshPackage();
+			return;
+		}
+		try {
+			PackageInfo pi;
+			pi = getPackageManager().getPackageInfo(p.pkg.packageName, 0);
+			plia.add(new PkgListItem(this, pi));
+			plia.sort();
+		} catch (NameNotFoundException e1) {
+			Toast.makeText(this, "I guess you removed it?", Toast.LENGTH_SHORT).show();
+		} catch (IllegalArgumentException e) {
+			// That's okay
+		}
+		plia.remove(p);
+	}
+
+	private void refreshPackage() {
 		new GetPackagesInBackground().execute(new RefreshHandler());
 	}
 
@@ -415,13 +402,15 @@ public class SDMove extends ListActivity {
 		lv.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				Intent it = new Intent(Intent.ACTION_VIEW);
+				PkgListItem pli = plia.getItem(position);
 
 				it.setClassName("com.android.settings", "com.android.settings.InstalledAppDetails");
-				it.putExtra("com.android.settings.ApplicationPkgName", plia.getItem(position).name);
-				it.putExtra("pkg", plia.getItem(position).pkg.packageName);
+				it.putExtra("com.android.settings.ApplicationPkgName", pli.name);
+				it.putExtra("pkg", pli.pkg.packageName);
 
 				List<ResolveInfo> acts = getPackageManager().queryIntentActivities(it, 0);
 
+				controlledPkg = pli;
 				if (acts.size() > 0) {
 					startActivity(it);
 				}
@@ -456,7 +445,7 @@ public class SDMove extends ListActivity {
 			}
 		}
 		if (count > 0) {
-			refreshPackages();
+			refreshPackage();
 		} else {
 			Toast.makeText(this, R.string.noignoredpackages, Toast.LENGTH_SHORT).show();
 		}

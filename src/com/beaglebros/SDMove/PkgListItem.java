@@ -1,11 +1,21 @@
 package com.beaglebros.SDMove;
 
 
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.AssetManager;
+import android.content.res.XmlResourceParser;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -31,13 +41,63 @@ class PkgListItem {
 		storepref = storeprefin;
 		stored = storedin;
 	}
+	
+	public PkgListItem(Context context, PackageInfo pkgin) throws IllegalArgumentException{
+		PackageManager pm = context.getPackageManager();
+		String packageName;
+		packageName = pkgin.packageName;
+		if ( packageName == null || packageName == "" ) {
+			packageName = "android";
+		}
+		try {
+			AssetManager am = context.createPackageContext(packageName, 0).getAssets();
+			XmlResourceParser xml = am.openXmlResourceParser("AndroidManifest.xml");
+			try {
+				int eventType = xml.getEventType();
+				xmlloop:
+				while (eventType != XmlPullParser.END_DOCUMENT) {
+					switch (eventType) {
+					case XmlPullParser.START_TAG:
+						if (! xml.getName().matches("manifest")) {
+							eventType = xml.nextToken();
+							continue xmlloop;
+						} else {
+							for (int j = 0; j < xml.getAttributeCount(); j++) {
+								if (xml.getAttributeName(j).matches("installLocation")) {
+									pkg = pkgin;
+									name = pkgin.applicationInfo.loadLabel(pm).toString();
+									stored = ((pkgin.applicationInfo.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) == 0)?PkgListItem.PKG_STORED_INTERNAL:PkgListItem.PKG_STORED_EXTERNAL;
+									storepref = Integer.parseInt(xml.getAttributeValue(j));
+									break xmlloop;
+								}
+							}
+						}
+						break;
+					}
+					eventType = xml.nextToken();
+				}
+				if (eventType == XmlPullParser.END_DOCUMENT) {
+					throw new IllegalArgumentException("package has no installLocation attribute");
+				}
+			} catch (IOException ioe) {
+				Log.e("PkgListItem", "Reading XML", ioe);
+			} catch (XmlPullParserException xppe) {
+				Log.e("PkgListItem", "Parsing XML", xppe);
+			}
+
+		} catch (NameNotFoundException e) {
+			// TODO Auto-generated catch block
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+		}
+	}
 
 	public String toString() {
 		return name;
 	}
 	
 	public int getColor() {
-		int color = -1;
+		int color = R.color.impossible;
 		//Context c = getApplicationContext();
 		switch(storepref) {
 		case PKG_STOREPREF_AUTO:

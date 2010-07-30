@@ -10,4 +10,5 @@
 	<string name="prefext">Blue</string>
 	<color name="prefint">#ff00ffff</color>
 	<string name="prefint">Cyan</string>
+<color name="impossible">#ffff00ff</color>
 </resources>
