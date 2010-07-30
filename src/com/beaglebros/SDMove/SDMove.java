@@ -75,62 +75,8 @@ public class SDMove extends ListActivity {
 	private static final String IGNOREPREF = "ignore-";
 	
 	PkgListItemAdapter plia;
-	
-	@Override
-	public Object onRetainNonConfigurationInstance() {
-	    final ArrayList<PkgListItem> data = new ArrayList<PkgListItem>();
-	    for (int i=0; i<plia.getCount(); i++) {
-	    	data.add(plia.getItem(i));
-	    }
-	    return data;
-	}
-	
-	private class GetPackagesInBackground extends AsyncTask<Handler, Void, Void> {
-		
-		ArrayList<PkgListItem> pat;
-		
-		@Override
-		public void onPreExecute() {
-			showDialog(PROGRESS_DIALOG);
-		}
-		
-		@Override
-		protected Void doInBackground(Handler... handlers) {
-			if ( handlers.length != 1 ) {
-				return null;
-			}
-			pat = new ArrayList<PkgListItem>();
-			getPackages(pat);
-			/*
-			try {
-				Thread.sleep(5000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			*/
-			Message m = handlers[0].obtainMessage(0);
-			m.obj = pat;
-			m.sendToTarget();
-			return null;
-		}
-		
-		@Override
-		public void onPostExecute(Void v) {
-			removeDialog(PROGRESS_DIALOG);
-		}
-		
-	}
-	
-	class CreateHandler extends Handler {
-		@Override
-		public void handleMessage(Message msg) {
-			@SuppressWarnings("unchecked") // for "pl" only
-			ArrayList<PkgListItem> pl = (ArrayList<PkgListItem>)msg.obj;
-			populateAdapter(pl, getSortPref());
-		}
-	}
-	
+	ProgressDialog pd;
+
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -147,111 +93,49 @@ public class SDMove extends ListActivity {
 		
 	}
 
-	private Comparator<PkgListItem> getSortPref() {
-		SharedPreferences settings = getPreferences(MODE_PRIVATE);
-		switch (settings.getInt(SETTINGS_SORTBY, SETTINGS_SORTBY_DEFAULT)) {
-		case SETTINGS_SORTBY_NAME:
-			return new byPkgName();
-			//break;
-		case SETTINGS_SORTBY_STATUS:
-		default:
-			return new byPkgStatus();
-			//break;
-		}
-	}
-	
-	class RefreshHandler extends Handler {
+	class CreateHandler extends Handler {
 		@Override
 		public void handleMessage(Message msg) {
 			@SuppressWarnings("unchecked") // for "pl" only
 			ArrayList<PkgListItem> pl = (ArrayList<PkgListItem>)msg.obj;
-			plia.clear();
-			for (PkgListItem pli: pl) {
-				plia.insert(pli, 0);
-			}
-			removeIgnoredPackages(plia);
-			plia.sort();
+			populateAdapter(pl, getSortPref());
 		}
 	}
-	
-	private void refreshPackages() {
-		new GetPackagesInBackground().execute(new RefreshHandler());
-	}
-	
-	private void populateAdapter(ArrayList<PkgListItem> pap, Comparator<PkgListItem> s) {
-		Collections.sort(pap, s);
-		plia = new PkgListItemAdapter(SDMove.this, R.layout.pkglistitemview, getPreferences(MODE_PRIVATE).getInt(SETTINGS_VIEWSIZE, SETTINGS_VIEWSIZE_DEFAULT), pap);
-		plia.sorter = s;
-		removeIgnoredPackages(plia);
-		setListAdapter(plia);
-		ListView lv = getListView();
-		lv.setOnItemClickListener(new OnItemClickListener() {
-			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				Intent it = new Intent(Intent.ACTION_VIEW);
 
-				it.setClassName("com.android.settings", "com.android.settings.InstalledAppDetails");
-				it.putExtra("com.android.settings.ApplicationPkgName", plia.getItem(position).name);
-				it.putExtra("pkg", plia.getItem(position).pkg.packageName);
-
-				List<ResolveInfo> acts = getPackageManager().queryIntentActivities(it, 0);
-
-				if (acts.size() > 0) {
-					startActivity(it);
-				}
-			}
-		});
-		registerForContextMenu(lv);
-	}
-
-	private void removeIgnoredPackages(PkgListItemAdapter plia) {
-		SharedPreferences settings = getPreferences(MODE_PRIVATE);
-		for (int i = 0; i < plia.getCount(); i++) {
-			if (settings.contains(IGNOREPREF + plia.getItem(i).name)) {
-				plia.remove(plia.getItem(i));
-				i--; // because the remove causes the positions of the following items to shift down
-			}
-		}
-	}
-	
 	@Override
-	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-		super.onCreateContextMenu(menu, v, menuInfo);
-		getMenuInflater().inflate(R.menu.contextmenu, menu);
+	public Object onRetainNonConfigurationInstance() {
+	    final ArrayList<PkgListItem> data = new ArrayList<PkgListItem>();
+	    for (int i=0; i<plia.getCount(); i++) {
+	    	data.add(plia.getItem(i));
+	    }
+	    return data;
 	}
 	
-	@Override
-	public boolean onContextItemSelected(MenuItem item) {
-		AdapterContextMenuInfo info = (AdapterContextMenuInfo)item.getMenuInfo();
-		PkgListItem pli = plia.getItem(info.position);
-		addIgnore(pli.name);
-		plia.remove(pli);
-		return true;
-	}
-	
-	private void addIgnore(String pkg) {
-		SharedPreferences settings = getPreferences(MODE_PRIVATE);
-		settings.edit().putBoolean(IGNOREPREF + pkg, true).commit();
-	}
-	
-	private void clearIgnores() {
-		SharedPreferences settings = getPreferences(MODE_PRIVATE);
-		int count = 0;
-		Set<String> s = settings.getAll().keySet();
-		for (String key: s) {
-			if (key.startsWith(IGNOREPREF)) {
-				settings.edit().remove(key).commit();
-				count++;
+	protected Dialog onCreateDialog(int id, Bundle args) {
+		switch (id) {
+		case ABOUT_DIALOG:
+			AlertDialog d = null;
+			try {
+				d = AboutDialogBuilder.create(this);
+			} catch (NameNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-		}
-		if (count > 0) {
-			refreshPackages();
-		} else {
-			Toast.makeText(this, R.string.noignoredpackages, Toast.LENGTH_SHORT).show();
-		}
+			return d;
+			//break;
+		case PROGRESS_DIALOG:
+			pd = new ProgressDialog(SDMove.this);
+			pd.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+			pd.setTitle("Please wait");
+			pd.setMessage("Loading packages");
+			pd.setCancelable(true);
+			return pd;
+			//break;
+		default:
+			return null;
+		}		
 	}
-	
-	ProgressDialog pd;
-	
+
 	public static class AboutDialogBuilder {
 		public static AlertDialog create(Context context) throws NameNotFoundException {
 			final RelativeLayout d = (RelativeLayout)View.inflate(context, R.layout.aboutdialog, null);
@@ -288,35 +172,10 @@ public class SDMove extends ListActivity {
 			tv = (TextView)d.findViewById(R.id.thanks);
 			tv.setMovementMethod(LinkMovementMethod.getInstance());
 			tv.setText(Html.fromHtml(tmp));
-
+	
 			return new AlertDialog.Builder(context).setTitle(R.string.abouttitle).setCancelable(true).setIcon(android.R.drawable.ic_dialog_info).setPositiveButton(
 				 context.getString(android.R.string.ok), null).setView(d).create();
 		}
-	}
-	
-	protected Dialog onCreateDialog(int id, Bundle args) {
-		switch (id) {
-		case ABOUT_DIALOG:
-			AlertDialog d = null;
-			try {
-				d = AboutDialogBuilder.create(this);
-			} catch (NameNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			return d;
-			//break;
-		case PROGRESS_DIALOG:
-			pd = new ProgressDialog(SDMove.this);
-			pd.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-			pd.setTitle("Please wait");
-			pd.setMessage("Loading packages");
-			pd.setCancelable(true);
-			return pd;
-			//break;
-		default:
-			return null;
-		}		
 	}
 
 	@Override
@@ -325,7 +184,7 @@ public class SDMove extends ListActivity {
 		inflater.inflate(R.menu.mainmenu, menu);
 		return true;
 	}
-	
+
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		int sb = getPreferences(MODE_PRIVATE).getInt(SETTINGS_SORTBY, SETTINGS_SORTBY_DEFAULT);
 		int vs = getPreferences(MODE_PRIVATE).getInt(SETTINGS_VIEWSIZE, SETTINGS_VIEWSIZE_DEFAULT);
@@ -368,7 +227,7 @@ public class SDMove extends ListActivity {
 		
 		return true;
 	}
-	
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle item selection
@@ -424,6 +283,58 @@ public class SDMove extends ListActivity {
 		}
 	}
 
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+		super.onCreateContextMenu(menu, v, menuInfo);
+		getMenuInflater().inflate(R.menu.contextmenu, menu);
+	}
+
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo)item.getMenuInfo();
+		PkgListItem pli = plia.getItem(info.position);
+		addIgnore(pli.name);
+		plia.remove(pli);
+		return true;
+	}
+
+	private class GetPackagesInBackground extends AsyncTask<Handler, Void, Void> {
+		
+		ArrayList<PkgListItem> pat;
+		
+		@Override
+		public void onPreExecute() {
+			showDialog(PROGRESS_DIALOG);
+		}
+		
+		@Override
+		protected Void doInBackground(Handler... handlers) {
+			if ( handlers.length != 1 ) {
+				return null;
+			}
+			pat = new ArrayList<PkgListItem>();
+			getPackages(pat);
+			/*
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			*/
+			Message m = handlers[0].obtainMessage(0);
+			m.obj = pat;
+			m.sendToTarget();
+			return null;
+		}
+		
+		@Override
+		public void onPostExecute(Void v) {
+			removeDialog(PROGRESS_DIALOG);
+		}
+		
+	}
+	
 	private void getPackages(ArrayList<PkgListItem> p) {
 		PackageManager pm = getPackageManager();
 		
@@ -474,6 +385,94 @@ public class SDMove extends ListActivity {
 				// TODO Auto-generated catch block
 			}
 	
+		}
+	}
+
+	private void refreshPackages() {
+		new GetPackagesInBackground().execute(new RefreshHandler());
+	}
+
+	class RefreshHandler extends Handler {
+		@Override
+		public void handleMessage(Message msg) {
+			@SuppressWarnings("unchecked") // for "pl" only
+			ArrayList<PkgListItem> pl = (ArrayList<PkgListItem>)msg.obj;
+			plia.clear();
+			for (PkgListItem pli: pl) {
+				plia.insert(pli, 0);
+			}
+			removeIgnoredPackages(plia);
+			plia.sort();
+		}
+	}
+	
+	private void populateAdapter(ArrayList<PkgListItem> pap, Comparator<PkgListItem> s) {
+		Collections.sort(pap, s);
+		plia = new PkgListItemAdapter(SDMove.this, R.layout.pkglistitemview, getPreferences(MODE_PRIVATE).getInt(SETTINGS_VIEWSIZE, SETTINGS_VIEWSIZE_DEFAULT), pap);
+		plia.sorter = s;
+		removeIgnoredPackages(plia);
+		setListAdapter(plia);
+		ListView lv = getListView();
+		lv.setOnItemClickListener(new OnItemClickListener() {
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				Intent it = new Intent(Intent.ACTION_VIEW);
+
+				it.setClassName("com.android.settings", "com.android.settings.InstalledAppDetails");
+				it.putExtra("com.android.settings.ApplicationPkgName", plia.getItem(position).name);
+				it.putExtra("pkg", plia.getItem(position).pkg.packageName);
+
+				List<ResolveInfo> acts = getPackageManager().queryIntentActivities(it, 0);
+
+				if (acts.size() > 0) {
+					startActivity(it);
+				}
+			}
+		});
+		registerForContextMenu(lv);
+	}
+
+	private void addIgnore(String pkg) {
+		SharedPreferences settings = getPreferences(MODE_PRIVATE);
+		settings.edit().putBoolean(IGNOREPREF + pkg, true).commit();
+	}
+
+	private void removeIgnoredPackages(PkgListItemAdapter plia) {
+		SharedPreferences settings = getPreferences(MODE_PRIVATE);
+		for (int i = 0; i < plia.getCount(); i++) {
+			if (settings.contains(IGNOREPREF + plia.getItem(i).name)) {
+				plia.remove(plia.getItem(i));
+				i--; // because the remove causes the positions of the following items to shift down
+			}
+		}
+	}
+	
+	private void clearIgnores() {
+		SharedPreferences settings = getPreferences(MODE_PRIVATE);
+		int count = 0;
+		Set<String> s = settings.getAll().keySet();
+		for (String key: s) {
+			if (key.startsWith(IGNOREPREF)) {
+				settings.edit().remove(key).commit();
+				count++;
+			}
+		}
+		if (count > 0) {
+			refreshPackages();
+		} else {
+			Toast.makeText(this, R.string.noignoredpackages, Toast.LENGTH_SHORT).show();
+		}
+	}
+	
+	private Comparator<PkgListItem> getSortPref() {
+		SharedPreferences settings = getPreferences(MODE_PRIVATE);
+		switch (settings.getInt(SETTINGS_SORTBY, SETTINGS_SORTBY_DEFAULT)) {
+		case SETTINGS_SORTBY_NAME:
+			return new byPkgName();
+			//break;
+		case SETTINGS_SORTBY_STATUS:
+		default:
+			return new byPkgStatus();
+			//break;
 		}
 	}
 
