@@ -73,6 +73,7 @@ public class SDMove extends ListActivity {
 	
 	private PkgListItemAdapter plia;
 	private PkgListItem controlledPkg = null;
+	private ProgressDialog pd;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -83,7 +84,7 @@ public class SDMove extends ListActivity {
 		ArrayList<PkgListItem> data = (ArrayList<PkgListItem>)getLastNonConfigurationInstance();
 		
 		if (data == null) {
-			new GetPackagesInBackground().execute(new CreateHandler());
+			new GetPackagesInBackground().execute(new CreateHandler(), new ProgressDialogHandler());
 		} else {
 			populateAdapter(data, getSortPref());
 		}
@@ -135,10 +136,11 @@ public class SDMove extends ListActivity {
 			return d;
 			//break;
 		case PROGRESS_DIALOG:
-			ProgressDialog pd = new ProgressDialog(SDMove.this);
-			pd.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+			pd = new ProgressDialog(SDMove.this);
+			pd.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 			pd.setTitle("Please wait");
 			pd.setMessage("Loading packages");
+			pd.setIndeterminate(true);
 			pd.setCancelable(true);
 			return pd;
 			//break;
@@ -189,6 +191,22 @@ public class SDMove extends ListActivity {
 		}
 	}
 
+	class ProgressDialogHandler extends Handler {
+		@Override
+		public void handleMessage(Message msg) {
+			int max = msg.arg1;
+			int progress = msg.arg2;
+			pd.setIndeterminate(false);
+			Log.e("SDMove", Integer.toString(max) + " " + Integer.toString(progress));
+			if (max != -1 && max != pd.getMax()) {
+				pd.setMax(max);
+			}
+			if (progress != -1 && max != pd.getProgress()) {
+				pd.setProgress(progress);
+			}
+		}
+	}
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
@@ -337,19 +355,11 @@ public class SDMove extends ListActivity {
 		
 		@Override
 		protected Void doInBackground(Handler... handlers) {
-			if ( handlers.length != 1 ) {
+			if ( handlers.length != 2 ) {
 				return null;
 			}
 			pat = new ArrayList<PkgListItem>();
-			getPackages(pat);
-			/*
-			try {
-				Thread.sleep(5000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			*/
+			getPackages(pat, handlers[1]);
 			Message m = handlers[0].obtainMessage(0);
 			m.obj = pat;
 			m.sendToTarget();
@@ -363,14 +373,23 @@ public class SDMove extends ListActivity {
 		
 	}
 	
-	private void getPackages(ArrayList<PkgListItem> p) {
+	private void getPackages(ArrayList<PkgListItem> p, Handler h) {
 		PackageManager pm = getPackageManager();
+		Message m;
 		
-		for (PackageInfo pkg: pm.getInstalledPackages(0)) {
+		List<PackageInfo> pl = pm.getInstalledPackages(0);
+		m = h.obtainMessage(1, pl.size(), -1);
+		m.sendToTarget();
+		int count = 1;
+		for (PackageInfo pkg: pl) {
 			try {
 				p.add(new PkgListItem(this, pkg));
+				m = h.obtainMessage(0, -1, count++);
+				m.sendToTarget();
 			} catch (IllegalArgumentException e) {
 				// That's okay
+				m = h.obtainMessage(0, -1, count++);
+				m.sendToTarget();
 			}
 		}
 	}
