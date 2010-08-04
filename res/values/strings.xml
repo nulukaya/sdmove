@@ -14,19 +14,21 @@
 <string name="sortbystatus">Sort by Status</string>
 <string name="abouttitle">About SDMove</string>
 <string-array name="thanks">
-<item>Icon by &lt;a href=&quot;http://dryicons.com/&quot;&gt;DryIcons&lt;/a&gt;</item>
+	<item>Icon by &lt;a href=&quot;http://dryicons.com/&quot;&gt;DryIcons&lt;/a&gt;</item>
 </string-array>
-<string-array name="thanksdetail"><item>Thanks to iSec Partners for providing the source code to Manifest Explorer, which pointed me in the right direction in parsing the AndroidManifest file.</item><item>Thanks to the guys at QuickSystemInfo for providing their source code, which showed me how to directly open the Application Info program.</item></string-array><string name="viewmenu">View</string>
+<string-array name="thanksdetail">
+	<item>Thanks to iSec Partners for providing the source code to Manifest Explorer, which pointed me in the right direction in parsing the AndroidManifest file.</item>
+	<item>Thanks to the guys at QuickSystemInfo for providing their source code, which showed me how to directly open the Application Info program.</item>
+</string-array>
+<string name="viewmenu">View</string>
 <string name="viewlarge">Large Text</string>
-<string name="viewmedium">Medium Text</string><string name="viewsmall">Small Text</string>
-
-
+<string name="viewmedium">Medium Text</string>
+<string name="viewsmall">Small Text</string>
 <string name="contextignore">Ignore</string>
-<string name="contextlaunch">Launch</string><string name="clearignoremenu">Unignore</string>
+<string name="contextlaunch">Launch</string>
+<string name="clearignoremenu">Unignore</string>
 <string name="clearignoremenu_long">Clear Ignored Packages</string>
 <string name="refreshmenu">Refresh</string>
 <string name="refreshmenu_long">Refresh Package Listing</string>
-
 <string name="noignoredpackages">All packages already visible</string>
-
 </resources>
