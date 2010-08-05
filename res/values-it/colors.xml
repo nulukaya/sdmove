@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--  Translated by Spider-Pork on #android-dev, freenode -->
+<resources>
+	<string name="autoext">Verde</string> <!-- Green -->
+	<string name="autoint">Giallo</string> <!-- Yellow -->
+	<string name="intonly">Rosso</string> <!-- Red -->
+	<string name="prefext">Blu</string> <!-- Blue -->
+	<string name="prefint">Ciano</string> <!-- Cyan -->
+</resources>

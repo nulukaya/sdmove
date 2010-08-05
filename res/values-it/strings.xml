@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--  Translated by Spider-Pork on #android-dev, freenode -->
+<resources>
+	<string name="aboutsumm">SDMove fornisce una comoda interfaccia per la ricerca di applicazioni che possono essere spostate dalla memoria interna a quella esterna (solitamente la SD Card). E' sufficiente selezionare un'applicazione per avere accesso ad una interfaccia di comando, dalla quale sarà possibile spostare l'applicazione.</string>
+	<string name="autoextdesc">indica che l'applicazione è stata spostata sulla memoria esterna</string>
+	<string name="autointdesc">indica che l'applicazione non è ancora stata spostata verso la memoria esterna, ma può esserlo</string>
+	<string name="intonlydesc">indica che lo sviluppatore ha chiesto che sia impedito il trasferimento dell'applicazione verso la memoria esterna</string>
+	<string name="prefextdesc">indica che l'applicazione preferisce essere su memoria esterna, dove attualmente si trova.</string>
+	<string name="prefintdesc">indica che l'applicazione preferisce essere su memoria esterna, ma attualmente si trova sulla memoria interna.</string>
+	<!--<string name="aboutmenu">About</string>-->
+	<string name="sortmenu">Ordina</string>
+	<string name="sortbyname">Ordina per nome</string>
+	<string name="sortbystatus">Ordina per stato</string>
+	<!--<string name="abouttitle">About SDMove</string>-->
+	<string name="viewlarge">Testo Grande</string>
+	<string name="viewmedium">Testo Medio</string>
+	<string name="viewsmall">Testo Piccolo</string>
+	<string name="contextignore">Ignora</string>
+	<string name="contextlaunch">Avvia</string>
+	<!--<string name="clearignoremenu">Unignore</string>-->
+	<string name="clearignoremenu_long">Cancella dalla lista i pacchetti ignorati</string>
+	<string name="refreshmenu">Aggiorna</string>
+	<string name="refreshmenu_long">Aggiorna la lista dei pacchetti</string>
+	<string name="noignoredpackages">Tutti i pacchetti sono visibili</string>
+</resources>
