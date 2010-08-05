@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<string name="aboutsumm">SDMove provides a convenient interface for finding applications that can be moved off internal storage and onto external storage, which is, in most cases, your SD card.  Simply click on an application to be taken directly to a dialog that provides the interface for moving the application.</string>
+</resources>
