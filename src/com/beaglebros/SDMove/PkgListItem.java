@@ -50,6 +50,9 @@ class PkgListItem {
 		if ( packageName == null || packageName == "" ) {
 			packageName = "android";
 		}
+		// should be:
+		//  if (pkgin.applicationInfo.flags & ApplicationInfo.FLAG_FORWARD_LOCK) {
+		// but FLAG_FORWARD_LOCK is marked as "@hide".  WHY?!?
 		try {
 			AssetManager am = context.createPackageContext(packageName, 0).getAssets();
 			XmlResourceParser xml = am.openXmlResourceParser("AndroidManifest.xml");
@@ -68,7 +71,12 @@ class PkgListItem {
 									pkg = pkgin;
 									name = pkgin.applicationInfo.loadLabel(pm).toString();
 									stored = ((pkgin.applicationInfo.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) == 0)?PkgListItem.PKG_STORED_INTERNAL:PkgListItem.PKG_STORED_EXTERNAL;
-									storepref = Integer.parseInt(xml.getAttributeValue(j));
+									if ( ( pkgin.applicationInfo.flags & (1<<20) ) == 0 ) {
+										storepref = Integer.parseInt(xml.getAttributeValue(j));
+									} else {
+										// TODO: set different flag?
+										storepref = PKG_STOREPREF_INT;
+									}
 									break xmlloop;
 								}
 							}
