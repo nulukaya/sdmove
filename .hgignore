@@ -1,0 +1,7 @@
+
+syntax: regexp
+\.png$
+syntax: glob
+bin/*
+syntax: glob
+.settings/*

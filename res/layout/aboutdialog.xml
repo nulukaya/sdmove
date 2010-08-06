@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/dialoglayout"
+                android:layout_width="fill_parent" android:layout_height="fill_parent">
+	<ScrollView android:id="@+id/dialogbodyscroll" android:layout_width="fill_parent" android:layout_height="wrap_content"
+	            android:layout_above="@+id/abouthr" android:layout_alignParentTop="true"
+	            xmlns:android="http://schemas.android.com/apk/res/android">
+		<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		                android:id="@+id/dialogbody"
+		                android:layout_width="fill_parent" android:layout_height="fill_parent">
+			<TextView android:id="@+id/aboutsumm" android:text="@string/aboutsumm" android:padding="3sp"
+			          android:layout_height="wrap_content" android:layout_width="wrap_content">
+			</TextView>
+			<TextView android:id="@+id/autoextdesc" android:textSize="12sp" android:padding="3sp"
+			          android:layout_below="@+id/aboutsumm"
+			          android:layout_height="wrap_content" android:layout_width="wrap_content">
+			</TextView>
+			<TextView android:id="@+id/autointdesc" android:textSize="12sp" android:padding="3sp"
+			          android:layout_below="@+id/autoextdesc"
+			          android:layout_height="wrap_content" android:layout_width="wrap_content">
+			</TextView>
+			<TextView android:id="@+id/prefextdesc" android:textSize="12sp" android:padding="3sp"
+			          android:layout_below="@+id/autointdesc"
+			          android:layout_height="wrap_content" android:layout_width="wrap_content">
+			</TextView>
+			<TextView android:id="@+id/prefintdesc" android:textSize="12sp" android:padding="3sp"
+			          android:layout_below="@+id/prefextdesc"
+			          android:layout_height="wrap_content" android:layout_width="wrap_content">
+			</TextView>
+			<TextView android:id="@+id/intonlydesc" android:textSize="12sp" android:padding="3sp"
+			          android:layout_below="@+id/prefintdesc"
+			          android:layout_height="wrap_content" android:layout_width="wrap_content">
+			</TextView>
+		</RelativeLayout>
+	</ScrollView>
+	<View android:id="@+id/abouthr" android:background="#40FFFFFF"
+	      android:layout_above="@+id/thanks"
+	      android:layout_width="fill_parent" android:layout_height="1px">
+	</View>
+	<TextView android:id="@+id/thanks" android:textSize="8sp" android:padding="3sp"
+	          android:layout_above="@+id/copyright" android:layout_centerHorizontal="true" android:gravity="center_horizontal"
+	          android:layout_height="wrap_content" android:layout_width="wrap_content">		
+	</TextView>
+	<TextView android:id="@+id/copyright" android:text="@string/copyright" android:textSize="10sp"
+	          android:layout_alignParentBottom="true" android:layout_centerHorizontal="true"
+	          android:layout_height="wrap_content" android:layout_width="wrap_content">		
+	</TextView>
+</RelativeLayout>
