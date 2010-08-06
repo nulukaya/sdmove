@@ -117,6 +117,9 @@ public class SDMove extends ListActivity {
 	@Override
 	public Object onRetainNonConfigurationInstance() {
 	    final ArrayList<PkgListItem> data = new ArrayList<PkgListItem>();
+	    if (plia == null) {
+	    	return null;
+	    }
 	    for (int i=0; i<plia.getCount(); i++) {
 	    	data.add(plia.getItem(i));
 	    }
@@ -515,12 +518,18 @@ public class SDMove extends ListActivity {
 
 	private final class byPkgName implements Comparator<PkgListItem> {
 		public int compare(PkgListItem a, PkgListItem b) {
-		   return(a.toString()).compareToIgnoreCase(b.toString());
+			if (a == null || b == null) {
+				throw new ClassCastException();
+			}
+			return(a.toString()).compareToIgnoreCase(b.toString());
 	     }
 	}
 
 	private final class byPkgStatus implements Comparator<PkgListItem> {
 		public int compare(PkgListItem a, PkgListItem b) {
+			if (a == null || b == null) {
+				throw new ClassCastException();
+			}
 			int ret;
 			ret = new Integer(a.stored).compareTo(b.stored);
 			if (ret != 0 ) {
