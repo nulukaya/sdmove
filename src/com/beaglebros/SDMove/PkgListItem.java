@@ -2,6 +2,7 @@ package com.beaglebros.SDMove;
 
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -21,6 +22,26 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
+
+class PkgList extends ArrayList<PkgListItem>{
+	private static final long serialVersionUID = -5384284065196705520L;
+	
+	public String title;
+	
+	public PkgList() {
+		super();
+	}
+	
+	public PkgList(final String tin) {
+		super();
+		title = tin;
+	}
+	
+	public String toString() {
+		return title;
+	}
+}
+
 
 class PkgListItem {
 	public PackageInfo pkg;
