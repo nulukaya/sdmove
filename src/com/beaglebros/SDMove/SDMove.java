@@ -16,7 +16,6 @@ package com.beaglebros.SDMove;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -73,6 +72,14 @@ public class SDMove extends Activity {
 	private static final int SETTINGS_VIEWSIZE_SMALL = PkgListItemAdapter.TEXT_SMALL;
 	private static final int SETTINGS_VIEWSIZE_DEFAULT = SETTINGS_VIEWSIZE_LARGE;
 	private static final String IGNOREPREF = "ignore-";
+	private static final int PKGS_ALL = 0;
+	private static final int PKGS_INTONLY = 1;
+	private static final int PKGS_PREFINT = 2;
+	private static final int PKGS_PREFEXT = 3;
+	private static final int PKGS_AUTOINT = 4;
+	private static final int PKGS_AUTOEXT = 5;
+	private static final int PKGS_FORWLOCK = 6;
+	private static final int PKGS_NOFLAG = 7;
 	
 	private PkgListItemAdapter plia;
 	private PkgListItem controlledPkg = null;
@@ -350,7 +357,7 @@ public class SDMove extends Activity {
 
 	private class GetPackagesInBackground extends AsyncTask<Handler, Void, Void> {
 		
-		PkgList pat;
+		ArrayList<PkgList> pat = null;
 		
 		@Override
 		public void onPreExecute() {
@@ -362,10 +369,20 @@ public class SDMove extends Activity {
 			if ( handlers.length != 2 ) {
 				return null;
 			}
-			pat = new PkgList();
+			if (pat == null) {
+				pat = new ArrayList<PkgList>();
+			}
+			pat.add(PKGS_ALL, new PkgList());
+			pat.add(PKGS_INTONLY, new PkgList());
+			pat.add(PKGS_PREFINT, new PkgList());
+			pat.add(PKGS_PREFEXT, new PkgList());
+			pat.add(PKGS_AUTOINT, new PkgList());
+			pat.add(PKGS_AUTOEXT, new PkgList());
+			pat.add(PKGS_FORWLOCK, new PkgList());
+			pat.add(PKGS_NOFLAG, new PkgList());
 			getPackages(pat, handlers[1]);
 			Message m = handlers[0].obtainMessage(0);
-			m.obj = pat;
+			m.obj = pat.get(PKGS_ALL);
 			m.sendToTarget();
 			return null;
 		}
@@ -377,7 +394,7 @@ public class SDMove extends Activity {
 		
 	}
 	
-	private void getPackages(PkgList p, Handler h) {
+	private void getPackages(ArrayList<PkgList> p, Handler h) {
 		PackageManager pm = getPackageManager();
 		Message m;
 		
@@ -387,7 +404,8 @@ public class SDMove extends Activity {
 		int count = 1;
 		for (PackageInfo pkg: pl) {
 			try {
-				p.add(new PkgListItem(this, pkg));
+				PkgListItem newpli = new PkgListItem(this, pkg);
+				p.get(PKGS_ALL).add(newpli);
 				m = h.obtainMessage(0, -1, count++);
 				m.sendToTarget();
 			} catch (IllegalArgumentException e) {
