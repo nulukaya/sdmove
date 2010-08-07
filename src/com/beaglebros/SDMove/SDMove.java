@@ -25,7 +25,6 @@ import android.text.Html;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ForegroundColorSpan;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -102,13 +101,11 @@ public class SDMove extends ListActivity {
 	
 	@Override
 	public void onStop() {
-		Log.e("SDMove", "onStop");
 		super.onStop();
 	}
 
 	@Override
 	public void onRestart() {
-		Log.e("SDMove", "onRestart");
 		refreshPackage(controlledPkg);
 		controlledPkg = null;
 		super.onRestart();
@@ -200,7 +197,6 @@ public class SDMove extends ListActivity {
 			int max = msg.arg1;
 			int progress = msg.arg2;
 			pd.setIndeterminate(false);
-			Log.e("SDMove", Integer.toString(max) + " " + Integer.toString(progress));
 			if (max != -1 && max != pd.getMax()) {
 				pd.setMax(max);
 			}
@@ -486,7 +482,6 @@ public class SDMove extends ListActivity {
 		for (String key: s) {
 			Matcher m = regex.matcher(key);
 			if (m.matches()) {
-				Log.e("SDMove", m.group(1));
 				PkgListItem pli = plia.getItem(m.group(1));
 				if (pli != null) {
 					plia.getItem(m.group(1)).hidden=false;
