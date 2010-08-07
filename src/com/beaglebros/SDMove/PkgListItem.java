@@ -15,6 +15,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
 import android.content.res.XmlResourceParser;
+import android.graphics.Typeface;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -103,6 +104,14 @@ class PkgListItem {
 
 	public String toString() {
 		return name;
+	}
+	
+	public int getStyle() {
+		if (stored == PKG_STORED_INTERNAL) {
+			return Typeface.BOLD;
+		} else {
+			return -1;
+		}
 	}
 	
 	public int getColor() {
@@ -198,6 +207,10 @@ class PkgListItemAdapter extends ArrayAdapter<PkgListItem> {
 		//view.setMinHeight(Math.round(context.getResources().getDisplayMetrics().density * (view.getTextSize() * 3 - 2)));
 		view.setMinHeight((int)(view.getTextSize() * 3 - 2));
 		view.setTextColor(context.getResources().getColor((p.getColor())));
+		int style = p.getStyle();
+		if (style != -1) {
+			view.setTypeface(Typeface.create(view.getTypeface(), style));
+		}
 		return view;
 	}
 	

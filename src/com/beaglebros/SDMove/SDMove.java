@@ -25,6 +25,7 @@ import android.text.Html;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -45,6 +46,8 @@ import android.content.SharedPreferences;
 import android.content.pm.*;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
+import android.graphics.Typeface;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -163,6 +166,7 @@ public class SDMove extends ListActivity {
 			
 			io = new SpannableString(r.getString(R.string.intonly) + " " + r.getString(R.string.intonlydesc));
 			io.setSpan(new ForegroundColorSpan(r.getColor(R.color.intonly)), 0, r.getString(R.string.intonly).length(), 0);
+			io.setSpan(new StyleSpan(Typeface.BOLD), 0, r.getString(R.string.intonly).length(), 0);
 			tv = (TextView)body.findViewById(R.id.intonlydesc);
 			tv.setText(io);
 			io = new SpannableString(r.getString(R.string.autoext) + " " + r.getString(R.string.autoextdesc));
@@ -171,6 +175,7 @@ public class SDMove extends ListActivity {
 			tv.setText(io);
 			io = new SpannableString(r.getString(R.string.autoint) + " " + r.getString(R.string.autointdesc));
 			io.setSpan(new ForegroundColorSpan(r.getColor(R.color.autoint)), 0, r.getString(R.string.autoint).length(), 0);
+			io.setSpan(new StyleSpan(Typeface.BOLD), 0, r.getString(R.string.autoint).length(), 0);
 			tv = (TextView)body.findViewById(R.id.autointdesc);
 			tv.setText(io);
 			io = new SpannableString(r.getString(R.string.prefext) + " " + r.getString(R.string.prefextdesc));
@@ -179,6 +184,7 @@ public class SDMove extends ListActivity {
 			tv.setText(io);
 			io = new SpannableString(r.getString(R.string.prefint) + " " + r.getString(R.string.prefintdesc));
 			io.setSpan(new ForegroundColorSpan(r.getColor(R.color.prefint)), 0, r.getString(R.string.prefint).length(), 0);
+			io.setSpan(new StyleSpan(Typeface.BOLD), 0, r.getString(R.string.prefint).length(), 0);
 			tv = (TextView)body.findViewById(R.id.prefintdesc);
 			tv.setText(io);
 			String tmp = "";
