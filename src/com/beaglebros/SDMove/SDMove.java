@@ -13,6 +13,7 @@ package com.beaglebros.SDMove;
 // Thanks to Leeds for pointing out my stupid mistake in interpreting a stack trace
 // and to everyone in general on #android-dev for putting up with me
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
@@ -26,7 +27,6 @@ import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -57,7 +57,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-public class SDMove extends ListActivity {
+public class SDMove extends Activity {
 	
 	private static final int ABOUT_DIALOG = 0;
 	private static final int PROGRESS_DIALOG = 1;
@@ -442,8 +442,9 @@ public class SDMove extends ListActivity {
 		plia = new PkgListItemAdapter(SDMove.this, R.layout.pkglistitemview, getPreferences(MODE_PRIVATE).getInt(SETTINGS_VIEWSIZE, SETTINGS_VIEWSIZE_DEFAULT), pap);
 		plia.sorter = s;
 		updateIgnoredPackages(plia);
-		setListAdapter(plia);
-		ListView lv = getListView();
+		ListView lv = new ListView(this);
+		setContentView(lv);
+		lv.setAdapter(plia);
 		lv.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				Intent it = new Intent(Intent.ACTION_VIEW);
