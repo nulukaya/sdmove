@@ -1,14 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<color name="autoext">#ff00ff00</color>
+	<color name="autoext">#ff009e73</color>
 	<string name="autoext">Green</string>
-	<color name="autoint">#ffffff00</color>
+	
+	<color name="autoint">#fff0e442</color>
 	<string name="autoint">Yellow</string>
-	<color name="intonly">#ffff0000</color>
+	
+	<color name="intonly">#ffff0055</color>
 	<string name="intonly">Red</string>
-	<color name="prefext">#ff7777ff</color>
+	
+	<color name="prefext">#ff0072b2</color>
 	<string name="prefext">Blue</string>
+	
 	<color name="prefint">#ff00ffff</color>
 	<string name="prefint">Cyan</string>
-	<color name="impossible">#ffff00ff</color>
+	
+	<color name="impossible">#ffcc7943</color>
 </resources>
