@@ -83,8 +83,7 @@ public class SDMove extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		@SuppressWarnings("unchecked") // for "data" only
-		ArrayList<PkgListItem> data = (ArrayList<PkgListItem>)getLastNonConfigurationInstance();
+		PkgList data = (PkgList)getLastNonConfigurationInstance();
 		
 		if (data == null) {
 			new GetPackagesInBackground().execute(new CreateHandler(), new ProgressDialogHandler());
@@ -97,8 +96,7 @@ public class SDMove extends Activity {
 	class CreateHandler extends Handler {
 		@Override
 		public void handleMessage(Message msg) {
-			@SuppressWarnings("unchecked") // for "pl" only
-			ArrayList<PkgListItem> pl = (ArrayList<PkgListItem>)msg.obj;
+			PkgList pl = (PkgList)msg.obj;
 			populateAdapter(pl, getSortPref());
 		}
 	}
@@ -117,7 +115,7 @@ public class SDMove extends Activity {
 
 	@Override
 	public Object onRetainNonConfigurationInstance() {
-	    final ArrayList<PkgListItem> data = new ArrayList<PkgListItem>();
+	    final PkgList data = new PkgList();
 	    if (plia == null) {
 	    	return null;
 	    }
@@ -352,7 +350,7 @@ public class SDMove extends Activity {
 
 	private class GetPackagesInBackground extends AsyncTask<Handler, Void, Void> {
 		
-		ArrayList<PkgListItem> pat;
+		PkgList pat;
 		
 		@Override
 		public void onPreExecute() {
@@ -364,7 +362,7 @@ public class SDMove extends Activity {
 			if ( handlers.length != 2 ) {
 				return null;
 			}
-			pat = new ArrayList<PkgListItem>();
+			pat = new PkgList();
 			getPackages(pat, handlers[1]);
 			Message m = handlers[0].obtainMessage(0);
 			m.obj = pat;
@@ -379,7 +377,7 @@ public class SDMove extends Activity {
 		
 	}
 	
-	private void getPackages(ArrayList<PkgListItem> p, Handler h) {
+	private void getPackages(PkgList p, Handler h) {
 		PackageManager pm = getPackageManager();
 		Message m;
 		
@@ -426,8 +424,7 @@ public class SDMove extends Activity {
 	class RefreshHandler extends Handler {
 		@Override
 		public void handleMessage(Message msg) {
-			@SuppressWarnings("unchecked") // for "pl" only
-			ArrayList<PkgListItem> pl = (ArrayList<PkgListItem>)msg.obj;
+			PkgList pl = (PkgList)msg.obj;
 			plia.clear();
 			for (PkgListItem pli: pl) {
 				plia.insert(pli, 0);
@@ -437,7 +434,7 @@ public class SDMove extends Activity {
 		}
 	}
 	
-	private void populateAdapter(ArrayList<PkgListItem> pap, Comparator<PkgListItem> s) {
+	private void populateAdapter(PkgList pap, Comparator<PkgListItem> s) {
 		Collections.sort(pap, s);
 		plia = new PkgListItemAdapter(SDMove.this, R.layout.pkglistitemview, getPreferences(MODE_PRIVATE).getInt(SETTINGS_VIEWSIZE, SETTINGS_VIEWSIZE_DEFAULT), pap);
 		plia.sorter = s;
