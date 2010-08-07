@@ -105,13 +105,11 @@ public class SDMove extends ListActivity {
 	
 	@Override
 	public void onStop() {
-		Log.e("SDMove", "onStop");
 		super.onStop();
 	}
 
 	@Override
 	public void onRestart() {
-		Log.e("SDMove", "onRestart");
 		refreshPackage(controlledPkg);
 		controlledPkg = null;
 		super.onRestart();
@@ -206,7 +204,6 @@ public class SDMove extends ListActivity {
 			int max = msg.arg1;
 			int progress = msg.arg2;
 			pd.setIndeterminate(false);
-			Log.e("SDMove", Integer.toString(max) + " " + Integer.toString(progress));
 			if (max != -1 && max != pd.getMax()) {
 				pd.setMax(max);
 			}
@@ -423,7 +420,7 @@ public class SDMove extends ListActivity {
 	}
 
 	private void refreshPackage() {
-		new GetPackagesInBackground().execute(new RefreshHandler());
+		new GetPackagesInBackground().execute(new RefreshHandler(), new ProgressDialogHandler());
 	}
 
 	class RefreshHandler extends Handler {
@@ -492,7 +489,6 @@ public class SDMove extends ListActivity {
 		for (String key: s) {
 			Matcher m = regex.matcher(key);
 			if (m.matches()) {
-				Log.e("SDMove", m.group(1));
 				PkgListItem pli = plia.getItem(m.group(1));
 				if (pli != null) {
 					plia.getItem(m.group(1)).hidden=false;
