@@ -417,7 +417,7 @@ public class SDMove extends ListActivity {
 	}
 
 	private void refreshPackage() {
-		new GetPackagesInBackground().execute(new RefreshHandler());
+		new GetPackagesInBackground().execute(new RefreshHandler(), new ProgressDialogHandler());
 	}
 
 	class RefreshHandler extends Handler {
