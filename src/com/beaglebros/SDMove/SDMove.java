@@ -399,7 +399,7 @@ public class SDMove extends Activity {
 		
 	}
 	
-	private void getPackages(ArrayList<PkgList> p, Handler h) {
+	private void getPackages(PkgListArray p, Handler h) {
 		PackageManager pm = getPackageManager();
 		Message m;
 		
