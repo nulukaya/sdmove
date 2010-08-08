@@ -18,9 +18,11 @@ import android.content.res.AssetManager;
 import android.content.res.XmlResourceParser;
 import android.graphics.Typeface;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 
 class PkgList extends ArrayList<PkgListItem>{
@@ -281,4 +283,93 @@ class PkgListItemAdapter extends ArrayAdapter<PkgListItem> {
 		return null;
 	}
 
+}
+
+
+class ExpandablePkgListAdapter extends BaseExpandableListAdapter {
+	private PkgListArray pll;
+	private Context context;
+	private int groupLayout;
+	private int childLayout;
+	
+	public static final int MAX_GROUPS = 100;
+	
+	public ExpandablePkgListAdapter(Context c, int gl, int cl) {
+		pll = new PkgListArray();
+		context = c;
+		groupLayout = gl;
+		childLayout = cl;
+	}
+	
+	public ExpandablePkgListAdapter(Context c, int gl, int cl, PkgListArray pllin) {
+		pll = pllin;
+		context = c;
+		groupLayout = gl;
+		childLayout = cl;
+	}
+	
+	public boolean addGroup(PkgList plin) {
+		if (pll.size() >= MAX_GROUPS) 
+			return false;
+		return pll.add(plin);
+	}
+	
+	public boolean addGroup(String s) {
+		if (pll.size() >= MAX_GROUPS) 
+			return false;
+		return pll.add(new PkgList(s));
+	}
+	
+	public boolean addChild(PkgListItem pin, int groupPosition) {
+		return pll.get(groupPosition).add(pin);
+	}
+
+	public Object getChild(int groupPosition, int childPosition) {
+		return pll.get(groupPosition).get(childPosition);
+	}
+
+	public long getChildId(int groupPosition, int childPosition) {
+		return ((childPosition + 1) * MAX_GROUPS) + (groupPosition + 1);
+	}
+
+	public View getChildView(int groupPosition, int childPosition,
+			boolean isLastChild, View convertView, ViewGroup parent) {
+		LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		TextView view = (TextView)inflater.inflate(childLayout, parent, false);
+		view.setText(pll.get(groupPosition).get(childPosition).toString());
+		return view;
+	}
+
+	public int getChildrenCount(int groupPosition) {
+		return pll.get(groupPosition).size();
+	}
+
+	public Object getGroup(int groupPosition) {
+		return pll.get(groupPosition);
+	}
+
+	public int getGroupCount() {
+		return pll.size();
+	}
+
+	public long getGroupId(int groupPosition) {
+		return groupPosition + 1;
+	}
+
+	public View getGroupView(int groupPosition, boolean isExpanded,
+			View convertView, ViewGroup parent) {
+		LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		TextView view = (TextView)inflater.inflate(groupLayout, parent, false);
+		view.setText(pll.get(groupPosition).toString());
+		return view;
+	}
+
+	public boolean hasStableIds() {
+		return false;
+	}
+
+	public boolean isChildSelectable(int groupPosition, int childPosition) {
+		return true;
+	}
+	
 }
