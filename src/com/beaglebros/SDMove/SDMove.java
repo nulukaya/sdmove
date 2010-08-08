@@ -502,7 +502,6 @@ public class SDMove extends Activity {
 		plia.sorter = s;
 		updateIgnoredPackages(plia);
 		ListView lv = new ListView(this);
-		setContentView(lv);
 		lv.setAdapter(plia);
 		lv.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -522,6 +521,7 @@ public class SDMove extends Activity {
 			}
 		});
 		registerForContextMenu(lv);
+		setContentView(lv);
 	}
 
 	private void addIgnore(PkgListItem pkg) {
