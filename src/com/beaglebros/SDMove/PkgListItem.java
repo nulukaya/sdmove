@@ -48,6 +48,8 @@ class PkgListItem {
 	public String name;
 	public int stored;
 	public int storepref;
+	public boolean noflag = true;
+	public boolean forwlock = false;
 	public boolean hidden = false;
 	
 	// Experimentally determined
@@ -67,10 +69,21 @@ class PkgListItem {
 	
 	public PkgListItem(Context context, PackageInfo pkgin) throws IllegalArgumentException{
 		PackageManager pm = context.getPackageManager();
-		String packageName;
-		packageName = pkgin.packageName;
+		
+		pkg = pkgin;
+		String packageName = pkg.packageName;
 		if ( packageName == null || packageName == "" ) {
 			packageName = "android";
+		}
+		name = pkgin.applicationInfo.loadLabel(pm).toString();
+		if (name == null) {
+			name = packageName;
+		}
+		if ( ( pkgin.applicationInfo.flags & (1<<20) ) != 0 ) {
+			// should be:
+			//  if (pkgin.applicationInfo.flags & ApplicationInfo.FLAG_FORWARD_LOCK) {
+			// but FLAG_FORWARD_LOCK is marked as "@hide".  WHY?!?
+			forwlock = true;
 		}
 		try {
 			AssetManager am = context.createPackageContext(packageName, 0).getAssets();
@@ -87,18 +100,9 @@ class PkgListItem {
 						} else {
 							for (int j = 0; j < xml.getAttributeCount(); j++) {
 								if (xml.getAttributeName(j).matches("installLocation")) {
-									pkg = pkgin;
-									name = pkgin.applicationInfo.loadLabel(pm).toString();
+									noflag = false;
 									stored = ((pkgin.applicationInfo.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) == 0)?PkgListItem.PKG_STORED_INTERNAL:PkgListItem.PKG_STORED_EXTERNAL;
-									// should be:
-									//  if (pkgin.applicationInfo.flags & ApplicationInfo.FLAG_FORWARD_LOCK) {
-									// but FLAG_FORWARD_LOCK is marked as "@hide".  WHY?!?
-									if ( ( pkgin.applicationInfo.flags & (1<<20) ) == 0 ) {
-										storepref = Integer.parseInt(xml.getAttributeValue(j));
-									} else {
-										// TODO: set different flag?
-										storepref = PKG_STOREPREF_INT;
-									}
+									storepref = Integer.parseInt(xml.getAttributeValue(j));
 									break xmlloop;
 								}
 							}
@@ -107,9 +111,11 @@ class PkgListItem {
 					}
 					eventType = xml.nextToken();
 				}
+				/*
 				if (eventType == XmlPullParser.END_DOCUMENT) {
 					throw new IllegalArgumentException("package has no installLocation attribute");
 				}
+				*/
 			} catch (IOException ioe) {
 				Log.e("PkgListItem", "Reading XML", ioe);
 			} catch (XmlPullParserException xppe) {
@@ -136,6 +142,9 @@ class PkgListItem {
 	}
 	
 	public int getColor() {
+		if (noflag || forwlock) {
+			return (R.color.intonly);
+		}
 		int color = R.color.impossible;
 		//Context c = getApplicationContext();
 		switch(storepref) {
