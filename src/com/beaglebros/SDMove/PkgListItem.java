@@ -194,6 +194,11 @@ class PkgListItem {
 	
 }
 
+
+class PkgListArray extends ArrayList<PkgList>{
+	private static final long serialVersionUID = 4805887563026094864L;
+}
+
 class PkgListItemAdapter extends ArrayAdapter<PkgListItem> {
 	Context context;
 	Comparator<PkgListItem> sorter;
