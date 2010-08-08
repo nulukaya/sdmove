@@ -26,6 +26,7 @@ import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -403,16 +404,59 @@ public class SDMove extends Activity {
 		m.sendToTarget();
 		int count = 1;
 		for (PackageInfo pkg: pl) {
-			try {
-				PkgListItem newpli = new PkgListItem(this, pkg);
+			PkgListItem newpli = new PkgListItem(this, pkg);
+			if (newpli.noflag) {
+				p.get(PKGS_NOFLAG).add(newpli);
+				if (newpli.forwlock) {
+					p.get(PKGS_FORWLOCK).add(newpli);
+				}
+			} else {
 				p.get(PKGS_ALL).add(newpli);
-				m = h.obtainMessage(0, -1, count++);
-				m.sendToTarget();
-			} catch (IllegalArgumentException e) {
-				// That's okay
-				m = h.obtainMessage(0, -1, count++);
-				m.sendToTarget();
+				if (newpli.forwlock) {
+					p.get(PKGS_FORWLOCK).add(newpli);
+				} else {
+					switch (newpli.storepref) { 
+					case PkgListItem.PKG_STOREPREF_AUTO:
+						switch (newpli.stored) {
+						case PkgListItem.PKG_STORED_EXTERNAL:
+							p.get(PKGS_AUTOEXT).add(newpli);
+							break;
+						case PkgListItem.PKG_STORED_INTERNAL:
+							p.get(PKGS_AUTOINT).add(newpli);
+							break;
+						default:
+							Log.wtf("SDMove", newpli.name + " stored neither internal nor external?");
+							break;
+						}
+						break;
+					case PkgListItem.PKG_STOREPREF_EXT:
+						switch (newpli.stored) {
+						case PkgListItem.PKG_STORED_EXTERNAL:
+							p.get(PKGS_PREFEXT).add(newpli);
+							break;
+						case PkgListItem.PKG_STORED_INTERNAL:
+							p.get(PKGS_PREFINT).add(newpli);
+							break;
+						default:
+							Log.wtf("SDMove", newpli.name + " stored neither internal nor external?");
+							break;
+						}
+						break;
+					case PkgListItem.PKG_STOREPREF_INT:
+						if (newpli.stored == PkgListItem.PKG_STORED_INTERNAL) {
+							p.get(PKGS_INTONLY).add(newpli);
+						} else {
+							Log.wtf("SDMove", newpli.name + " requires internal storage but not stored internally?");
+						}
+						break;
+					default:
+						Log.wtf("SDMove", newpli.name + " has an unknown storage preference");
+						break;
+					}
+				}
 			}
+			m = h.obtainMessage(0, -1, count++);
+			m.sendToTarget();
 		}
 	}
 
