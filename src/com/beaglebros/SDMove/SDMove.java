@@ -48,7 +48,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.Typeface;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -104,8 +103,8 @@ public class SDMove extends Activity {
 	class CreateHandler extends Handler {
 		@Override
 		public void handleMessage(Message msg) {
-			PkgList pl = (PkgList)msg.obj;
-			populateAdapter(pl, getSortPref());
+			PkgListArray pl = (PkgListArray)msg.obj;
+			populateAdapter(pl.get(PKGS_ALL), getSortPref());
 		}
 	}
 	
@@ -356,9 +355,6 @@ public class SDMove extends Activity {
         startActivity(i);
 	}
 	
-	private class PkgListArray extends ArrayList<PkgList>{
-		private static final long serialVersionUID = 4805887563026094864L;
-	}
 
 	private class GetPackagesInBackground extends AsyncTask<Handler, Void, Void> {
 		
@@ -387,7 +383,7 @@ public class SDMove extends Activity {
 			pat.add(PKGS_NOFLAG, new PkgList());
 			getPackages(pat, handlers[1]);
 			Message m = handlers[0].obtainMessage(0);
-			m.obj = pat.get(PKGS_ALL);
+			m.obj = pat;
 			m.sendToTarget();
 			return null;
 		}
@@ -490,9 +486,9 @@ public class SDMove extends Activity {
 	class RefreshHandler extends Handler {
 		@Override
 		public void handleMessage(Message msg) {
-			PkgList pl = (PkgList)msg.obj;
+			PkgListArray pl = (PkgListArray)msg.obj;
 			plia.clear();
-			for (PkgListItem pli: pl) {
+			for (PkgListItem pli: pl.get(PKGS_ALL)) {
 				plia.insert(pli, 0);
 			}
 			updateIgnoredPackages(plia);
