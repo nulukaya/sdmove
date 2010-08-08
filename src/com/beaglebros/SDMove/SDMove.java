@@ -536,9 +536,6 @@ public class SDMove extends Activity {
 
 	private final class byPkgName implements Comparator<PkgListItem> {
 		public int compare(PkgListItem a, PkgListItem b) {
-			if (a == null || b == null) {
-				throw new ClassCastException();
-			}
 			return(a.toString()).compareToIgnoreCase(b.toString());
 	     }
 	}
