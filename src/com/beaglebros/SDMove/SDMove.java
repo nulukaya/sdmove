@@ -90,7 +90,7 @@ public class SDMove extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		PkgList data = (PkgList)getLastNonConfigurationInstance();
+		PkgListArray data = (PkgListArray)getLastNonConfigurationInstance();
 		
 		if (data == null) {
 			new GetPackagesInBackground().execute(new CreateHandler(), new ProgressDialogHandler());
@@ -104,7 +104,7 @@ public class SDMove extends Activity {
 		@Override
 		public void handleMessage(Message msg) {
 			PkgListArray pl = (PkgListArray)msg.obj;
-			populateAdapter(pl.get(PKGS_ALL), getSortPref());
+			populateAdapter(pl, getSortPref());
 		}
 	}
 	
@@ -496,9 +496,9 @@ public class SDMove extends Activity {
 		}
 	}
 	
-	private void populateAdapter(PkgList pap, Comparator<PkgListItem> s) {
-		Collections.sort(pap, s);
-		plia = new PkgListItemAdapter(SDMove.this, R.layout.pkglistitemview, getPreferences(MODE_PRIVATE).getInt(SETTINGS_VIEWSIZE, SETTINGS_VIEWSIZE_DEFAULT), pap);
+	private void populateAdapter(PkgListArray pap, Comparator<PkgListItem> s) {
+		Collections.sort(pap.get(PKGS_ALL), s);
+		plia = new PkgListItemAdapter(SDMove.this, R.layout.pkglistitemview, getPreferences(MODE_PRIVATE).getInt(SETTINGS_VIEWSIZE, SETTINGS_VIEWSIZE_DEFAULT), pap.get(PKGS_ALL));
 		plia.sorter = s;
 		updateIgnoredPackages(plia);
 		ListView lv = new ListView(this);
