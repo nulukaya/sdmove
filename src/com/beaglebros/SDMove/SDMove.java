@@ -355,10 +355,14 @@ public class SDMove extends Activity {
         Intent i = getPackageManager().getLaunchIntentForPackage(pli.pkg.packageName);
         startActivity(i);
 	}
+	
+	private class PkgListArray extends ArrayList<PkgList>{
+		private static final long serialVersionUID = 4805887563026094864L;
+	}
 
 	private class GetPackagesInBackground extends AsyncTask<Handler, Void, Void> {
 		
-		ArrayList<PkgList> pat = null;
+		PkgListArray pat = null;
 		
 		@Override
 		public void onPreExecute() {
@@ -371,7 +375,7 @@ public class SDMove extends Activity {
 				return null;
 			}
 			if (pat == null) {
-				pat = new ArrayList<PkgList>();
+				pat = new PkgListArray();
 			}
 			pat.add(PKGS_ALL, new PkgList());
 			pat.add(PKGS_INTONLY, new PkgList());
