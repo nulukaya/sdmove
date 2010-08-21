@@ -73,6 +73,7 @@ public class SDMove extends ListActivity {
 	private PkgListItemAdapter plia;
 	private PkgListItem controlledPkg = null;
 	private ProgressDialog pd;
+	private ArrayList<PkgListItem> toBeMoved = null;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -108,6 +109,7 @@ public class SDMove extends ListActivity {
 	public void onRestart() {
 		refreshPackage(controlledPkg);
 		controlledPkg = null;
+		moveAllPackages(toBeMoved);
 		super.onRestart();
 	}
 
@@ -301,6 +303,10 @@ public class SDMove extends ListActivity {
 			clearIgnores();
 			return true;
 			//break;
+		case R.id.moveallmenu:
+			moveAllPackages();
+			return true;
+			//break;
 		case R.id.refreshmenu:
 			refreshPackage();
 			return true;
@@ -308,6 +314,34 @@ public class SDMove extends ListActivity {
 		default:
 			return super.onOptionsItemSelected(item);
 			// break;
+		}
+	}
+	
+	private void moveAllPackages(ArrayList<PkgListItem> pl) {
+		if ((pl == null) || (pl.size() == 0)) {
+			pl = null;
+			return;
+		}
+		PkgListItem pli = pl.get(0);
+		pl.remove(0);
+		openApplicationInfo(pli);
+		// should never really get here
+		return;
+	}
+	
+	private void moveAllPackages() {
+		toBeMoved = new ArrayList<PkgListItem>();
+		for (int i=0; i < plia.getCount(); i++) {
+			PkgListItem pli = plia.getItem(i);
+			if ((!pli.hidden) && (pli.storepref != PkgListItem.PKG_STOREPREF_INT) && (pli.stored == PkgListItem.PKG_STORED_INTERNAL)) {
+				toBeMoved.add(pli);
+			}
+		}
+		if (toBeMoved.size() == 0) {
+			//toast
+			toBeMoved = null;
+		} else {
+			moveAllPackages(toBeMoved);
 		}
 	}
 
