@@ -30,5 +30,7 @@
 <string name="clearignoremenu_long">Clear Ignored Packages</string>
 <string name="refreshmenu">Refresh</string>
 <string name="refreshmenu_long">Refresh Package Listing</string>
+<string name="moveallmenu">Move All</string>
+<string name="moveallmenu_long">Move All Packages</string>
 <string name="noignoredpackages">All packages already visible</string>
 </resources>

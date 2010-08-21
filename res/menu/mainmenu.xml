@@ -20,6 +20,8 @@
 			</group>
 		</menu>
 	</item>
+	<item android:id="@+id/moveallmenu" android:icon="@android:drawable/ic_menu_share" android:title="@string/moveallmenu_long" android:titleCondensed="@string/moveallmenu">
+	</item>
 	<item android:id="@+id/refreshmenu" android:icon="@android:drawable/ic_menu_rotate" android:title="@string/refreshmenu_long" android:titleCondensed="@string/refreshmenu">
 	</item>
 	<item android:id="@+id/clearignoremenu" android:icon="@android:drawable/ic_menu_revert" android:title="@string/clearignoremenu_long" android:titleCondensed="@string/clearignoremenu">
