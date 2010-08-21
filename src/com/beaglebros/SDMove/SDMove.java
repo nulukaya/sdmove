@@ -430,6 +430,20 @@ public class SDMove extends ListActivity {
 		}
 	}
 	
+	private void openApplicationInfo(PkgListItem pli) {
+		Intent it = new Intent(Intent.ACTION_VIEW);
+		it.setClassName("com.android.settings", "com.android.settings.InstalledAppDetails");
+		it.putExtra("com.android.settings.ApplicationPkgName", pli.name);
+		it.putExtra("pkg", pli.pkg.packageName);
+
+		List<ResolveInfo> acts = getPackageManager().queryIntentActivities(it, 0);
+
+		controlledPkg = pli;
+		if (acts.size() > 0) {
+			startActivity(it);
+		}
+	}
+			
 	private void populateAdapter(ArrayList<PkgListItem> pap, Comparator<PkgListItem> s) {
 		Collections.sort(pap, s);
 		plia = new PkgListItemAdapter(SDMove.this, R.layout.pkglistitemview, getPreferences(MODE_PRIVATE).getInt(SETTINGS_VIEWSIZE, SETTINGS_VIEWSIZE_DEFAULT), pap);
@@ -439,19 +453,8 @@ public class SDMove extends ListActivity {
 		ListView lv = getListView();
 		lv.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				Intent it = new Intent(Intent.ACTION_VIEW);
 				PkgListItem pli = plia.getItem(position);
-
-				it.setClassName("com.android.settings", "com.android.settings.InstalledAppDetails");
-				it.putExtra("com.android.settings.ApplicationPkgName", pli.name);
-				it.putExtra("pkg", pli.pkg.packageName);
-
-				List<ResolveInfo> acts = getPackageManager().queryIntentActivities(it, 0);
-
-				controlledPkg = pli;
-				if (acts.size() > 0) {
-					startActivity(it);
-				}
+				openApplicationInfo(pli);
 			}
 		});
 		registerForContextMenu(lv);
