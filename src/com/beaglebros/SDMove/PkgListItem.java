@@ -36,6 +36,10 @@ class PkgListItem {
 	public static final int PKG_STORED_INTERNAL = 0;
 	public static final int PKG_STORED_EXTERNAL = 1;
 	
+	// Should exist as ApplicationInfo.FLAG_FORWARD_LOCK
+	// but FLAG_FORWARD_LOCK is marked as "@hide".  WHY?!?
+	public static final int FLAG_FORWARD_LOCK = (1<<20);
+	
 	public PkgListItem(PackageInfo pkgin, String namein, int storedin, int storeprefin) {
 		pkg = pkgin;
 		name = namein;
@@ -68,16 +72,11 @@ class PkgListItem {
 									pkg = pkgin;
 									name = pkgin.applicationInfo.loadLabel(pm).toString();
 									stored = ((pkgin.applicationInfo.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) == 0)?PkgListItem.PKG_STORED_INTERNAL:PkgListItem.PKG_STORED_EXTERNAL;
-									// should be:
-									//  if (pkgin.applicationInfo.flags & ApplicationInfo.FLAG_FORWARD_LOCK) {
-									// but FLAG_FORWARD_LOCK is marked as "@hide".  WHY?!?
-									if ( ( pkgin.applicationInfo.flags & (1<<20) ) == 0 ) {
-										storepref = Integer.parseInt(xml.getAttributeValue(j));
-									} else {
-										// TODO: set different flag?
-										storepref = PKG_STOREPREF_INT;
-									}
-									if ( ( ( pkgin.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM ) == 0 ) || ( ( pkgin.applicationInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP ) ) == 0 ) {
+									if ( 
+									     ( ( pkgin.applicationInfo.flags & FLAG_FORWARD_LOCK ) == 0 ) &&
+									     ( ( pkgin.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM ) == 0 ) &&
+									     ( ( pkgin.applicationInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP ) == 0 )
+									   ) {
 										storepref = Integer.parseInt(xml.getAttributeValue(j));
 									} else {
 										// TODO: set different flag?
