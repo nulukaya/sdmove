@@ -77,6 +77,12 @@ class PkgListItem {
 										// TODO: set different flag?
 										storepref = PKG_STOREPREF_INT;
 									}
+									if ( ( ( pkgin.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM ) == 0 ) || ( ( pkgin.applicationInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP ) ) == 0 ) {
+										storepref = Integer.parseInt(xml.getAttributeValue(j));
+									} else {
+										// TODO: set different flag?
+										storepref = PKG_STOREPREF_INT;
+									}
 									break xmlloop;
 								}
 							}
