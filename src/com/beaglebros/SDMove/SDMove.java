@@ -17,7 +17,9 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -466,9 +468,35 @@ public class SDMove extends ListActivity {
 	
 	private void openApplicationInfo(PkgListItem pli) {
 		Intent it = new Intent(Intent.ACTION_VIEW);
-		it.setClassName("com.android.settings", "com.android.settings.InstalledAppDetails");
-		it.putExtra("com.android.settings.ApplicationPkgName", pli.name);
-		it.putExtra("pkg", pli.pkg.packageName);
+		switch (Build.VERSION.SDK_INT) {
+		case 1:
+		case 2:
+		case 3:
+		case 4:
+		case 5:
+		case 6:
+		case 7:
+			// Pre-Froyo
+			// it makes no sense for this app to run here, but, for the record, this is supposed to be the appropriate intent:
+			
+			//it.setClassName("com.android.settings", "com.android.settings.InstalledAppDetails");
+			//it.putExtra("com.android.settings.ApplicationPkgName", pli.name);
+			
+			// instead, we'll just return without doing anything
+			return;
+			//break;
+		case 8:
+			// Froyo
+			it.setClassName("com.android.settings", "com.android.settings.InstalledAppDetails");
+			it.putExtra("pkg", pli.pkg.packageName);
+			break;
+		case 9:
+		default:
+			// Gingerbread and later
+			it.setClassName("com.android.settings", "com.android.settings.applications.InstalledAppDetails");
+			it.setData(Uri.fromParts("pkg", pli.pkg.packageName, null));
+			break;
+		}
 
 		List<ResolveInfo> acts = getPackageManager().queryIntentActivities(it, 0);
 
